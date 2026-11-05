@@ -15,7 +15,7 @@ interface Props {
 const { title, description, ogImage = '/images/og-default.jpg', noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
 const ogImageUrl = new URL(ogImage, Astro.site ?? 'https://example.com').href;
-const siteName = '像素志 PIXEL NOTES';
+const siteName = '苜蓿草 CLOVER';
 ---
 
 <!doctype html>
