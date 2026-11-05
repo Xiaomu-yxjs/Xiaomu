@@ -61,7 +61,9 @@ const year = new Date().getFullYear();
 <style>
   .ftr {
     border-top: 1px solid var(--line);
-    background: var(--surface-2);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 -1px 0 rgba(92, 224, 144, 0.16), 0 -12px 34px -20px rgba(92, 224, 144, 0.5);
     padding-block: var(--sp-8) var(--sp-5);
   }
 
@@ -111,7 +113,7 @@ const year = new Date().getFullYear();
   }
 
   .mp-btn:hover {
-    border-color: var(--ink);
+    border-color: var(--accent);
     background: var(--surface);
   }
 
@@ -187,9 +189,10 @@ const year = new Date().getFullYear();
     max-width: 340px;
     width: calc(100vw - 40px);
     text-align: center;
-    box-shadow: var(--shadow);
+    box-shadow: var(--glow-strong);
     color: var(--ink);
-    background: var(--surface);
+    background: color-mix(in srgb, var(--bg) 86%, #0c2a1c);
+    backdrop-filter: blur(10px);
   }
 
   .mp-dialog::backdrop {

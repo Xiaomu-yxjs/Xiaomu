@@ -38,10 +38,10 @@ const siteName = '苜蓿草 CLOVER';
     <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <meta name="theme-color" content="#f7f7f4" />
+    <meta name="theme-color" content="#0a2417" />
     <slot name="head" />
   </head>
-  <body>
+  <body style={`--clover-bg: url('${withBase('/images/site-bg.jpg')}')`}>
     <a class="skip" href="#main">跳到主内容</a>
     <SiteHeader />
     <main id="main">
@@ -56,13 +56,15 @@ const siteName = '苜蓿草 CLOVER';
         z-index: 100;
         padding: 10px 16px;
         border-radius: 999px;
-        background: var(--ink);
-        color: #fff;
+        background: var(--accent);
+        color: var(--accent-ink);
         font-size: 14px;
         transition: top 0.2s var(--ease);
       }
       .skip:focus-visible {
         top: 12px;
+        background: var(--accent);
+        color: var(--accent-ink);
       }
     </style>
   </body>

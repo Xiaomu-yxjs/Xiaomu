@@ -101,8 +101,8 @@ const stats = [
     padding-block: var(--sp-9) var(--sp-8);
     border-bottom: 1px solid var(--line);
     background:
-      radial-gradient(1100px 420px at 88% -10%, #eeeaff 0%, transparent 62%),
-      radial-gradient(700px 380px at 4% 0%, #fff4e8 0%, transparent 60%);
+      radial-gradient(900px 380px at 86% -16%, rgba(92, 224, 144, 0.12), transparent 60%),
+      radial-gradient(520px 360px at 2% 4%, rgba(92, 224, 144, 0.06), transparent 62%);
   }
 
   .hero-inner {
@@ -130,7 +130,12 @@ const stats = [
     border-radius: var(--radius);
     overflow: hidden;
     background: #11131a;
-    transition: transform 0.35s var(--ease);
+    box-shadow: var(--glow);
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+
+  .art-card:hover {
+    box-shadow: var(--glow-strong);
   }
 
   .art-card :global(img) {

@@ -1,5 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="16" fill="#0f1115"/>
-  <rect x="16" y="16" width="32" height="32" rx="6" fill="none" stroke="#4f46e5" stroke-width="4"/>
-  <rect x="26" y="26" width="12" height="12" rx="2" fill="#4f46e5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="苜蓿草">
+  <defs>
+    <radialGradient id="cl" cx="42%" cy="38%" r="64%">
+      <stop offset="0%" stop-color="#c2f9d2"/>
+      <stop offset="52%" stop-color="#5ce090"/>
+      <stop offset="100%" stop-color="#1f9658"/>
+    </radialGradient>
+    <filter id="gl" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#gl)" fill="url(#cl)">
+    <g transform="translate(24 24)">
+      <path transform="rotate(0)"   d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+      <path transform="rotate(90)"  d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+      <path transform="rotate(180)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+      <path transform="rotate(270)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+      <path d="M0 8 C 0 13 -2 17 -5 21" stroke="url(#cl)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
 </svg>

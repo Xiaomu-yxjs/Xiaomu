@@ -161,7 +161,7 @@ const badges = [
   .lib-head {
     padding-block: var(--sp-8) var(--sp-6);
     border-bottom: 1px solid var(--line);
-    background: linear-gradient(180deg, #fbfaf7, var(--bg));
+    background: transparent;
   }
 
   .lib-title {
@@ -189,6 +189,8 @@ const badges = [
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--glow);
   }
 
   .filter-search {
@@ -265,10 +267,11 @@ const badges = [
   }
 
   .chip.active {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: #fff;
-    font-weight: 600;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+    box-shadow: 0 0 14px rgba(92, 224, 144, 0.45);
   }
 
   .filter-foot {
@@ -308,6 +311,7 @@ const badges = [
     border: 1px dashed var(--line-strong);
     border-radius: var(--radius);
     background: var(--surface-2);
+    box-shadow: var(--glow);
   }
 
   .empty-title {

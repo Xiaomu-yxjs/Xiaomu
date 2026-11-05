@@ -3,20 +3,24 @@
    卡片原则：用线不用阴影（--shadow 仅用于浮层/弹窗）
    ========================================================================== */
 :root {
-  /* 颜色 */
-  --bg: #f7f7f4;
-  --surface: #ffffff;
-  --surface-2: #fbfbf8;
-  --ink: #0f1115;
-  --ink-2: #4b5058;
-  --ink-3: #8b9098;
-  --line: #e5e5df;
-  --line-strong: #c8c8c0;
-  --accent: #4f46e5;
-  --accent-ink: #3b33cc;
-  --accent-soft: #eeecff;
-  --warm: #c2410c;
-  --warm-soft: #fff1e7;
+  /* 颜色 —— 苜蓿草暗绿发光主题 */
+  --bg: #0a2417;
+  --surface: rgba(255, 255, 255, 0.055);
+  --surface-2: rgba(255, 255, 255, 0.035);
+  --ink: #e9f3ec;
+  --ink-2: #b4c6ba;
+  --ink-3: #81a08f;
+  --line: rgba(150, 228, 180, 0.16);
+  --line-strong: rgba(150, 228, 180, 0.30);
+  --accent: #5ce090;
+  --accent-ink: #06291a;
+  --accent-soft: rgba(92, 224, 144, 0.16);
+  --warm: #ff8a4c;
+  --warm-soft: rgba(255, 138, 76, 0.16);
+
+  /* 发光：板块边缘微光 */
+  --glow: 0 0 0 1px rgba(92, 224, 144, 0.18), 0 0 26px rgba(92, 224, 144, 0.15);
+  --glow-strong: 0 0 0 1px rgba(92, 224, 144, 0.30), 0 0 34px rgba(92, 224, 144, 0.28);
 
   /* 间距（4 的倍数） */
   --sp-1: 4px;
@@ -58,7 +62,12 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: linear-gradient(rgba(5, 22, 14, 0.62), rgba(5, 22, 14, 0.62)), var(--clover-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font);
   font-size: 16px;
@@ -227,29 +236,33 @@ button {
   gap: var(--sp-2);
   height: 44px;
   padding-inline: var(--sp-5);
-  border: 1px solid var(--ink);
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 14px;
-  font-weight: 600;
-  transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(92, 224, 144, 0.32);
+  transition: transform 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
 }
 
 .btn:hover {
   transform: translateY(-1px);
-  background: #262a33;
+  background: #74e8a2;
+  box-shadow: 0 0 24px rgba(92, 224, 144, 0.5);
 }
 
 .btn--ghost {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--ink);
   border-color: var(--line-strong);
+  box-shadow: none;
 }
 
 .btn--ghost:hover {
-  background: var(--surface);
-  border-color: var(--ink);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--accent);
+  box-shadow: var(--glow);
 }
 
 .btn--block {
@@ -271,7 +284,7 @@ button {
   border-color: var(--ink);
 }
 
-/* ---------- 卡片（线，不用阴影） ---------- */
+/* ---------- 卡片（玻璃面板 + 边缘微光） ---------- */
 .card {
   position: relative;
   display: flex;
@@ -279,13 +292,16 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--glow);
   overflow: hidden;
-  transition: transform 0.18s var(--ease), border-color 0.18s var(--ease);
+  transition: transform 0.18s var(--ease), border-color 0.18s var(--ease), box-shadow 0.18s var(--ease);
 }
 
 .card:hover {
   transform: translateY(-3px);
   border-color: var(--line-strong);
+  box-shadow: var(--glow-strong);
 }
 
 .card-media {

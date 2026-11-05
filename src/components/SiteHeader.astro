@@ -15,7 +15,22 @@ const isActive = (href: string) =>
 <header class="hdr">
   <div class="wrap hdr-inner">
     <a class="brand" href={withBase('/')} aria-label="苜蓿草 首页">
-      <span class="brand-mark" aria-hidden="true"></span>
+      <svg class="brand-mark" viewBox="0 0 48 48" width="26" height="26" aria-hidden="true">
+        <defs>
+          <radialGradient id="clh" cx="42%" cy="38%" r="64%">
+            <stop offset="0%" stop-color="#c2f9d2"/>
+            <stop offset="52%" stop-color="#5ce090"/>
+            <stop offset="100%" stop-color="#1f9658"/>
+          </radialGradient>
+        </defs>
+        <g fill="url(#clh)" transform="translate(24 24)">
+          <path transform="rotate(0)"   d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+          <path transform="rotate(90)"  d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+          <path transform="rotate(180)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+          <path transform="rotate(270)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
+          <path d="M0 8 C 0 13 -2 17 -5 21" stroke="url(#clh)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
       <span class="brand-text">
         苜蓿草
         <em>CLOVER</em>
@@ -42,9 +57,10 @@ const isActive = (href: string) =>
     position: sticky;
     top: 0;
     z-index: 50;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: saturate(180%) blur(12px);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
     border-bottom: 1px solid var(--line);
+    box-shadow: 0 1px 0 rgba(92, 224, 144, 0.16), 0 10px 30px -18px rgba(92, 224, 144, 0.55);
   }
 
   .hdr-inner {
@@ -62,21 +78,10 @@ const isActive = (href: string) =>
   }
 
   .brand-mark {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    background: var(--ink);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .brand-mark::after {
-    content: '';
-    position: absolute;
-    inset: 6px 5px;
-    background: var(--accent);
-    border-radius: 2px;
-    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+    width: 26px;
+    height: 26px;
+    flex: none;
+    filter: drop-shadow(0 0 5px rgba(92, 224, 144, 0.85));
   }
 
   .brand-text {
