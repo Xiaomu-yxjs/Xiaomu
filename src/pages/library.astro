@@ -1,0 +1,342 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GameCard from '../components/GameCard.astro';
+import { BADGE_LABEL, categories, games } from '../lib/games';
+
+const badges = [
+  { value: 'all', label: '全部' },
+  { value: 'pick', label: BADGE_LABEL.pick },
+  { value: 'new', label: BADGE_LABEL.new },
+  { value: 'hot', label: BADGE_LABEL.hot },
+];
+---
+
+<BaseLayout
+  title="游戏库 · 全部手游测评 | 像素志"
+  description="按类别、标签、关键词筛选全部手游测评。每款都有评分、价格、平台与适合人群说明。"
+>
+  <section class="lib-head">
+    <div class="wrap">
+      <p class="eyebrow">Library</p>
+      <h1 class="lib-title">游戏库</h1>
+      <p class="lib-sub">共 {games.length} 款。筛选器在前端跑，不刷新页面。</p>
+    </div>
+  </section>
+
+  <section class="wrap lib-body">
+    <div class="filter" role="search">
+      <div class="filter-search">
+        <svg class="ico" viewBox="0 0 20 20" aria-hidden="true" width="16" height="16">
+          <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+          <path d="M13.5 13.5 17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+        </svg>
+        <input
+          id="q"
+          type="search"
+          placeholder="搜游戏名、类别或标签…"
+          autocomplete="off"
+          aria-label="搜索游戏"
+        />
+      </div>
+
+      <div class="filter-row" role="group" aria-label="按类别筛选">
+        <span class="filter-label">类别</span>
+        <div class="chips">
+          {categories.map((c) => (
+            <button class="chip" type="button" data-filter="category" data-value={c}>{c}</button>
+          ))}
+        </div>
+      </div>
+
+      <div class="filter-row" role="group" aria-label="按标记筛选">
+        <span class="filter-label">标记</span>
+        <div class="chips">
+          {badges.map((b) => (
+            <button class="chip" type="button" data-filter="badge" data-value={b.value}>{b.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div class="filter-foot">
+        <p class="count" id="count" aria-live="polite">共 {games.length} 款</p>
+        <button class="reset" type="button" id="reset">重置筛选</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid">
+      {games.map((game) => <GameCard game={game} />)}
+    </div>
+
+    <div class="empty" id="empty" hidden>
+      <p class="empty-title">没有匹配的游戏</p>
+      <p class="empty-sub">换个关键词，或者点「重置筛选」看看全部。</p>
+      <button class="btn btn--ghost" type="button" id="empty-reset">重置筛选</button>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  type State = { q: string; category: string; badge: string };
+
+  const grid = document.getElementById('grid');
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('.game-card'));
+  const qInput = document.getElementById('q') as HTMLInputElement | null;
+  const countEl = document.getElementById('count');
+  const emptyEl = document.getElementById('empty');
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+
+  const state: State = { q: '', category: '全部', badge: 'all' };
+
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (state.q) params.set('q', state.q);
+    if (state.category !== '全部') params.set('category', state.category);
+    if (state.badge !== 'all') params.set('badge', state.badge);
+    const qs = params.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+  }
+
+  function apply(pushUrl = true) {
+    let visible = 0;
+    const q = state.q.trim().toLowerCase();
+
+    for (const card of cards) {
+      const okCategory = state.category === '全部' || card.dataset.category === state.category;
+      const okBadge = state.badge === 'all' || card.dataset.badge === state.badge;
+      const okQuery = !q || (card.dataset.search ?? '').includes(q);
+      const ok = okCategory && okBadge && okQuery;
+      card.hidden = !ok;
+      if (ok) visible++;
+    }
+
+    if (countEl) countEl.textContent = visible === cards.length ? `共 ${cards.length} 款` : `${visible} / ${cards.length} 款`;
+    if (emptyEl) emptyEl.hidden = visible !== 0;
+    if (grid) grid.hidden = visible === 0;
+
+    for (const chip of chips) {
+      const key = chip.dataset.filter as 'category' | 'badge';
+      chip.classList.toggle('active', state[key] === chip.dataset.value);
+    }
+
+    if (pushUrl) syncUrl();
+  }
+
+  // 从 URL 读取初始状态（支持 /library/?badge=pick 这类外链）
+  const params = new URLSearchParams(location.search);
+  if (params.get('q')) state.q = params.get('q')!;
+  if (params.get('category')) state.category = params.get('category')!;
+  if (params.get('badge')) state.badge = params.get('badge')!;
+  if (qInput && state.q) qInput.value = state.q;
+
+  qInput?.addEventListener('input', () => {
+    state.q = qInput.value;
+    apply(false);
+  });
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      const key = chip.dataset.filter as 'category' | 'badge';
+      const value = chip.dataset.value ?? '';
+      // 再次点击已选中的「全部」类 chip 不取消，保持单选语义
+      state[key] = value;
+      apply();
+    });
+  }
+
+  function reset() {
+    state.q = '';
+    state.category = '全部';
+    state.badge = 'all';
+    if (qInput) qInput.value = '';
+    apply();
+  }
+
+  document.getElementById('reset')?.addEventListener('click', reset);
+  document.getElementById('empty-reset')?.addEventListener('click', reset);
+
+  apply(false);
+</script>
+
+<style>
+  .lib-head {
+    padding-block: var(--sp-8) var(--sp-6);
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #fbfaf7, var(--bg));
+  }
+
+  .lib-title {
+    font-size: clamp(30px, 4.4vw, 42px);
+    margin-top: var(--sp-3);
+  }
+
+  .lib-sub {
+    margin-top: var(--sp-3);
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  .lib-body {
+    padding-block: var(--sp-6) var(--sp-9);
+  }
+
+  /* ---------- 筛选条 ---------- */
+  .filter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    margin-bottom: var(--sp-6);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .filter-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .ico {
+    position: absolute;
+    left: 12px;
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+
+  .filter-search input {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px 0 36px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    background: var(--surface-2);
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+  }
+
+  .filter-search input::placeholder {
+    color: var(--ink-3);
+  }
+
+  .filter-search input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.06em;
+    width: 32px;
+    flex: none;
+  }
+
+  .chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    height: 30px;
+    padding-inline: 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--ink-2);
+    transition: all 0.16s var(--ease);
+  }
+
+  .chip:hover {
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+
+  .chip.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .filter-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--line);
+  }
+
+  .count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  .reset {
+    border: 0;
+    background: transparent;
+    font-size: 13px;
+    color: var(--ink-2);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--line-strong);
+  }
+
+  .reset:hover {
+    color: var(--ink);
+    text-decoration-color: var(--ink);
+  }
+
+  /* ---------- 空状态 ---------- */
+  .empty {
+    padding: var(--sp-9) var(--sp-4);
+    text-align: center;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+  }
+
+  .empty-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .empty-sub {
+    margin: var(--sp-2) 0 var(--sp-5);
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+
+  @media (min-width: 960px) {
+    .filter {
+      position: sticky;
+      top: 84px;
+      z-index: 20;
+      box-shadow: 0 1px 0 var(--line);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .filter {
+      padding: var(--sp-4);
+      margin-bottom: var(--sp-5);
+    }
+    .filter-label {
+      width: 100%;
+    }
+  }
+</style>

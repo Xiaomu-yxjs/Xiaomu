@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { withBase } from '../lib/base';
+
+interface Props {
+  title: string;
+  description: string;
+  /** 详情页可以传封面图 URL，缺省用站点默认图 */
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const { title, description, ogImage = '/images/og-default.jpg', noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
+const ogImageUrl = new URL(ogImage, Astro.site ?? 'https://example.com').href;
+const siteName = '像素志 PIXEL NOTES';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#f7f7f4" />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到主内容</a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+    <style>
+      .skip {
+        position: absolute;
+        left: 12px;
+        top: -60px;
+        z-index: 100;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 14px;
+        transition: top 0.2s var(--ease);
+      }
+      .skip:focus-visible {
+        top: 12px;
+      }
+    </style>
+  </body>
+</html>

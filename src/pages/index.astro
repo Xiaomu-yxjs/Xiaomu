@@ -1,0 +1,282 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PickCard from '../components/PickCard.astro';
+import GameCard from '../components/GameCard.astro';
+import { games, picks } from '../lib/games';
+import { getCover } from '../lib/images';
+import { withBase } from '../lib/base';
+
+const stats = [
+  { label: '收录游戏', value: String(games.length) },
+  { label: '编辑精选', value: String(picks.length) },
+  { label: '更新节奏', value: '每周' },
+];
+---
+
+<BaseLayout
+  title="像素志 · 手游测评与攻略"
+  description="数据驱动的手游测评站：先看结论，再看玩法、氪金与适配人群。评分、价格、平台一目了然。"
+>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Mobile game reviews · 不吹不黑</p>
+        <h1 class="hero-title">
+          先给结论，<br />
+          再谈<span class="mark">值不值得玩</span>。
+        </h1>
+        <p class="hero-sub">
+          每款游戏三分钟看完：核心玩法、氪金性价比、适合谁。数据能查到的都标来源，
+          查不到的写「未核实」——不编。
+        </p>
+        <div class="hero-actions">
+          <a class="btn" href={withBase('/library/')}>浏览全部游戏 <span aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost" href="#picks">看编辑精选</a>
+        </div>
+
+        <dl class="stats">
+          {stats.map((s) => (
+            <div class="stat">
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        {picks.map((game, i) => (
+          <div class={`art-card art-${i}`}>
+            <Image
+              src={getCover(game.cover)}
+              alt=""
+              widths={[360, 720]}
+              sizes="300px"
+              loading="eager"
+            />
+            <span class="art-label">{game.title}</span>
+          </div>
+        ))}
+        <span class="art-note">本周在玩 · {picks.length} 款</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section picks-band" id="picks">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Editor's picks</p>
+          <h2 class="section-title">精品推荐</h2>
+          <p class="section-sub">编辑部这周真的在玩的几款，最多三款，宁缺毋滥。</p>
+        </div>
+        <a class="link" href={withBase('/library/?badge=pick')}>全部精选 <span aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="grid">
+        {picks.map((game) => <PickCard game={game} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Library</p>
+          <h2 class="section-title">最近的测评</h2>
+          <p class="section-sub">按类别、标签或关键词筛选，全部免费查看。</p>
+        </div>
+        <a class="link" href={withBase('/library/')}>进入游戏库 <span aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="grid">
+        {games.map((game) => <GameCard game={game} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--sp-9) var(--sp-8);
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(1100px 420px at 88% -10%, #eeeaff 0%, transparent 62%),
+      radial-gradient(700px 380px at 4% 0%, #fff4e8 0%, transparent 60%);
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    gap: var(--sp-8);
+    align-items: center;
+  }
+
+  .hero-copy {
+    max-width: 620px;
+  }
+
+  /* 右侧叠层封面：纯装饰，读屏器忽略 */
+  .hero-art {
+    position: relative;
+    height: 430px;
+  }
+
+  .art-card {
+    position: absolute;
+    width: 78%;
+    max-width: 320px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #11131a;
+    transition: transform 0.35s var(--ease);
+  }
+
+  .art-card :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .art-label {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.94);
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .art-0 {
+    top: 0;
+    left: 0;
+    transform: rotate(-4deg);
+    z-index: 1;
+  }
+
+  .art-1 {
+    top: 128px;
+    right: 0;
+    transform: rotate(3.5deg);
+    z-index: 2;
+  }
+
+  .art-2 {
+    top: 256px;
+    left: 34px;
+    transform: rotate(-1.5deg);
+    z-index: 3;
+  }
+
+  .hero-art:hover .art-0 {
+    transform: rotate(-6deg) translateY(-4px);
+  }
+
+  .hero-art:hover .art-1 {
+    transform: rotate(5deg) translateY(-4px);
+  }
+
+  .hero-art:hover .art-2 {
+    transform: rotate(0deg) translateY(-4px);
+  }
+
+  .art-note {
+    position: absolute;
+    right: 4px;
+    bottom: -2px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+  }
+
+  .hero-title {
+    margin-top: var(--sp-4);
+    font-size: clamp(34px, 6.2vw, 60px);
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+  }
+
+  .mark {
+    white-space: nowrap;
+    /* 用背景色块代替 ::after（z-index:-1 会被 section 背景挡住） */
+    background: linear-gradient(transparent 62%, #ddd8ff 62%);
+    background-repeat: no-repeat;
+    padding-inline: 2px;
+    margin-inline: -2px;
+  }
+
+  .hero-sub {
+    margin-top: var(--sp-5);
+    max-width: 46ch;
+    color: var(--ink-2);
+    font-size: clamp(15px, 1.6vw, 17px);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+    flex-wrap: wrap;
+  }
+
+  .stats {
+    display: flex;
+    gap: var(--sp-8);
+    margin: var(--sp-8) 0 0;
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--line);
+  }
+
+  .stat dt {
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+
+  .stat dd {
+    margin: 2px 0 0;
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .picks-band {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (max-width: 1023px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+    }
+    .hero-art {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      padding-block: var(--sp-7) var(--sp-6);
+    }
+    .stats {
+      gap: var(--sp-6);
+      margin-top: var(--sp-6);
+    }
+    .stat dd {
+      font-size: 19px;
+    }
+    .hero-actions .btn {
+      flex: 1;
+      min-width: 150px;
+    }
+  }
+</style>

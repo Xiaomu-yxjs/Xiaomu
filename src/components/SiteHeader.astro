@@ -1,0 +1,172 @@
+---
+import { withBase } from '../lib/base';
+const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+const path = Astro.url.pathname; // 含 base，如 /Xiaomu/library
+const current = path.slice(base.length).replace(/\/+$/, '') || '/'; // 去掉 base 后的纯路径
+const nav = [
+  { href: '/', label: '首页' },
+  { href: '/library/', label: '游戏库' },
+  { href: '/#about', label: '关于' },
+];
+const isActive = (href: string) =>
+  href === '/' ? current === '/' : href.startsWith('/library') ? current.startsWith('/library') : false;
+---
+
+<header class="hdr">
+  <div class="wrap hdr-inner">
+    <a class="brand" href={withBase('/')} aria-label="像素志 首页">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">
+        像素志
+        <em>PIXEL NOTES</em>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="主导航">
+      {nav.map((item) => (
+        <a href={withBase(item.href)} class:list={['nav-link', { active: isActive(item.href) }]}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <a class="hdr-cta" href={withBase('/library/')}>
+      逛游戏库
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</header>
+
+<style>
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hdr-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-6);
+    height: 68px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+  }
+
+  .brand-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 6px 5px;
+    background: var(--accent);
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+
+  .brand-text {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-text em {
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--ink-3);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    margin-left: auto;
+  }
+
+  .nav-link {
+    font-size: 14px;
+    color: var(--ink-2);
+    transition: color 0.18s var(--ease);
+    position: relative;
+    padding-block: 4px;
+  }
+
+  .nav-link:hover {
+    color: var(--ink);
+  }
+
+  .nav-link.active {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+
+  .hdr-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding-inline: 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
+    flex: none;
+  }
+
+  .hdr-cta:hover {
+    background: var(--surface);
+    border-color: var(--ink);
+  }
+
+  @media (max-width: 767px) {
+    .hdr-inner {
+      height: 60px;
+      gap: var(--sp-4);
+    }
+    .brand-text em,
+    .hdr-cta {
+      display: none;
+    }
+    .nav {
+      gap: var(--sp-4);
+    }
+  }
+
+  @media (max-width: 380px) {
+    .brand-text {
+      font-size: 16px;
+    }
+  }
+</style>

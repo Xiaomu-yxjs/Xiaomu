@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/base';
+---
+
+<BaseLayout title="页面走丢了 | 像素志" description="这个页面不存在，回首页或去游戏库继续逛。" noindex>
+  <section class="wrap nf">
+    <p class="code">404</p>
+    <h1>这个页面不存在</h1>
+    <p class="sub">可能是链接过期了，或者游戏已经下架。回首页重新找找。</p>
+    <div class="actions">
+      <a class="btn" href={withBase('/')}>回首页</a>
+      <a class="btn btn--ghost" href={withBase('/library/')}>逛游戏库</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    padding-block: var(--sp-9);
+    max-width: 620px;
+  }
+
+  .code {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    color: var(--ink-3);
+  }
+
+  .nf h1 {
+    margin-top: var(--sp-3);
+    font-size: clamp(28px, 5vw, 40px);
+  }
+
+  .sub {
+    margin-top: var(--sp-3);
+    color: var(--ink-2);
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+  }
+</style>

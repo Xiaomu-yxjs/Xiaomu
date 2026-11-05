@@ -1,0 +1,247 @@
+---
+import { withBase } from '../lib/base';
+const year = new Date().getFullYear();
+---
+
+<footer class="ftr" id="about">
+  <div class="wrap">
+    <div class="ftr-top">
+      <div class="ftr-brand">
+        <div class="ftr-title">像素志 <span>PIXEL NOTES</span></div>
+        <p class="ftr-desc">
+          一个用 Astro 搭的手游测评站骨架：数据驱动、静态生成、零服务器成本。
+        </p>
+        <button class="mp-btn" type="button" id="mp-open">
+          <span class="mp-dot" aria-hidden="true"></span>
+          微信小程序入口
+        </button>
+      </div>
+
+      <nav class="ftr-cols" aria-label="页脚导航">
+        <div class="ftr-col">
+          <h3>浏览</h3>
+          <a href={withBase('/')}>首页</a>
+          <a href={withBase('/library/')}>游戏库</a>
+        </div>
+        <div class="ftr-col">
+          <h3>说明</h3>
+          <a href={withBase('/library/?badge=pick')}>编辑部精选</a>
+          <a href={withBase('/#about')}>数据来源</a>
+        </div>
+      </nav>
+    </div>
+
+    <div class="ftr-bottom">
+      <p class="disclaimer">
+        <strong>数据说明：</strong>本站为演示项目，所有游戏名称、评分、在玩人数、价格、下载链接均为占位虚构内容，
+        不对应任何真实产品，请勿作为消费或下载依据。
+      </p>
+      <p class="copy">© {year} 像素志 · Built with Astro</p>
+    </div>
+  </div>
+
+  <dialog class="mp-dialog" id="mp-dialog" aria-labelledby="mp-title">
+    <button class="mp-close" type="button" id="mp-close" aria-label="关闭">×</button>
+    <h2 id="mp-title">在小程序里继续看</h2>
+    <p class="mp-note">打开微信扫一扫，随时查评分与攻略。</p>
+    <img src={withBase('/images/mp-qr.svg')} alt="微信小程序二维码（占位图）" width="180" height="180" />
+    <p class="mp-hint">占位二维码，接入真实小程序时替换 <code>/public/images/mp-qr.svg</code></p>
+  </dialog>
+</footer>
+
+<script>
+  const dialog = document.getElementById('mp-dialog') as HTMLDialogElement | null;
+  document.getElementById('mp-open')?.addEventListener('click', () => dialog?.showModal());
+  document.getElementById('mp-close')?.addEventListener('click', () => dialog?.close());
+  dialog?.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+</script>
+
+<style>
+  .ftr {
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+    padding-block: var(--sp-8) var(--sp-5);
+  }
+
+  .ftr-top {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-7);
+    flex-wrap: wrap;
+  }
+
+  .ftr-brand {
+    max-width: 420px;
+  }
+
+  .ftr-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .ftr-title span {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--ink-3);
+    margin-left: 6px;
+    font-weight: 400;
+  }
+
+  .ftr-desc {
+    margin-top: var(--sp-3);
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+
+  .mp-btn {
+    margin-top: var(--sp-4);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding-inline: 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: transparent;
+    font-size: 13px;
+    transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+  }
+
+  .mp-btn:hover {
+    border-color: var(--ink);
+    background: var(--surface);
+  }
+
+  .mp-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #0f7355;
+  }
+
+  .ftr-cols {
+    display: flex;
+    gap: var(--sp-8);
+  }
+
+  .ftr-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .ftr-col h3 {
+    font-size: 12px;
+    font-family: var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .ftr-col a {
+    color: var(--ink-2);
+    transition: color 0.18s var(--ease);
+  }
+
+  .ftr-col a:hover {
+    color: var(--ink);
+  }
+
+  .ftr-bottom {
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  .disclaimer {
+    max-width: 66ch;
+    line-height: 1.7;
+  }
+
+  .disclaimer strong {
+    color: var(--ink-2);
+  }
+
+  .copy {
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+
+  /* 小程序弹窗 */
+  .mp-dialog {
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-l);
+    padding: var(--sp-6) var(--sp-6) var(--sp-5);
+    max-width: 340px;
+    width: calc(100vw - 40px);
+    text-align: center;
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    background: var(--surface);
+  }
+
+  .mp-dialog::backdrop {
+    background: rgb(15 17 21 / 0.45);
+  }
+
+  .mp-dialog h2 {
+    font-size: 18px;
+  }
+
+  .mp-note {
+    margin-top: var(--sp-2);
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+
+  .mp-dialog img {
+    margin: var(--sp-5) auto var(--sp-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+  }
+
+  .mp-hint {
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.6;
+  }
+
+  .mp-hint code {
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  .mp-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    background: transparent;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 767px) {
+    .ftr-top {
+      gap: var(--sp-6);
+    }
+    .ftr-cols {
+      gap: var(--sp-7);
+    }
+  }
+</style>

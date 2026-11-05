@@ -1,0 +1,444 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GameCard from '../../components/GameCard.astro';
+import { BADGE_LABEL, games, priceText, ratingText, type Game } from '../../lib/games';
+import { getCover, getShots } from '../../lib/images';
+import { withBase } from '../../lib/base';
+
+export function getStaticPaths() {
+  return games.map((game) => ({ params: { slug: game.slug }, props: { game } }));
+}
+
+interface Props {
+  game: Game;
+}
+
+const { game } = Astro.props;
+const cover = getCover(game.cover);
+const shots = getShots(game.screenshots);
+const related = games.filter((g) => g.slug !== game.slug && g.category === game.category).slice(0, 3);
+const fallbackRelated = games.filter((g) => g.slug !== game.slug).slice(0, 3);
+const recommend = related.length ? related : fallbackRelated;
+
+const desc = `${game.title}（${game.category}）：${game.description.slice(0, 62)}…`;
+const coverUrl = new URL(cover.src, Astro.site ?? 'https://example.com').href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: game.title,
+  genre: game.category,
+  applicationCategory: 'GameApplication',
+  operatingSystem: game.platform.join(', '),
+  description: game.description,
+  image: coverUrl,
+  url: new URL(`/games/${game.slug}/`, Astro.site ?? 'https://example.com').href,
+  ...(game.rating !== null
+    ? {
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: game.rating,
+          bestRating: 10,
+          worstRating: 0,
+          ratingCount: 1,
+        },
+      }
+    : {}),
+  ...(game.price > 0
+    ? {
+        offers: {
+          '@type': 'Offer',
+          price: game.price,
+          priceCurrency: 'CNY',
+          availability: 'https://schema.org/InStock',
+        },
+      }
+    : {}),
+};
+---
+
+<BaseLayout title={`${game.title} 测评 · ${game.category} | 像素志`} description={desc} ogImage={cover.src}>
+  <script type="application/ld+json" slot="head" is:inline set:html={JSON.stringify(jsonLd)} />
+
+  <div class="wrap">
+    <nav class="crumb" aria-label="面包屑">
+      <a href={withBase('/')}>首页</a>
+      <span aria-hidden="true">/</span>
+      <a href={withBase('/library/')}>游戏库</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{game.title}</span>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-media">
+        <Image
+          src={cover}
+          alt={`${game.title} 主视觉`}
+          widths={[600, 900, 1200]}
+          sizes="(max-width: 899px) 100vw, 560px"
+          loading="eager"
+          fetchpriority="high"
+        />
+        <span class="hero-tagline">{game.category}</span>
+      </div>
+
+      <div class="hero-info">
+        <div class="info-top">
+          <span class={`badge badge--${game.badge}`}>{BADGE_LABEL[game.badge]}</span>
+          <span class="meta-line">{game.players} 人在玩</span>
+        </div>
+
+        <h1 class="title">{game.title}</h1>
+        <p class="lede">{game.description}</p>
+
+        <dl class="facts">
+          <div class="fact">
+            <dt>评分</dt>
+            <dd class="fact-rating">
+              {game.rating === null ? (
+                <span class="pending">待定</span>
+              ) : (
+                <>
+                  <strong>{ratingText(game.rating)}</strong>
+                  <span class="max">/ 10</span>
+                </>
+              )}
+            </dd>
+          </div>
+          <div class="fact">
+            <dt>价格</dt>
+            <dd>
+              <span class="price">{priceText(game)}</span>
+              {game.originalPrice && <s class="price-old">¥{game.originalPrice}</s>}
+            </dd>
+          </div>
+          <div class="fact">
+            <dt>平台</dt>
+            <dd>{game.platform.join(' · ')}</dd>
+          </div>
+          <div class="fact">
+            <dt>类别</dt>
+            <dd>{game.category}</dd>
+          </div>
+        </dl>
+
+        <div class="tags">
+          {game.tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+
+        <a
+          class="btn btn--block"
+          href={game.externalUrl}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+        >
+          前往下载页 <span aria-hidden="true">↗</span>
+        </a>
+        <p class="tiny">外部链接，示例地址不含真实下载内容。</p>
+      </div>
+    </header>
+
+    {shots.length > 0 && (
+      <section class="shots-section" aria-labelledby="shots-title">
+        <div class="sec-head">
+          <h2 id="shots-title">截图画廊</h2>
+          <p class="sec-note">{shots.length} 张 · 左右滑动查看</p>
+        </div>
+        <div class="shots">
+          {shots.map((shot, i) => (
+            <Image
+              src={shot}
+              alt={`${game.title} 游戏画面 ${i + 1}`}
+              widths={[420, 840, 1280]}
+              sizes="(max-width: 639px) 82vw, 33vw"
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section class="review" aria-labelledby="review-title">
+      <h2 id="review-title">先说结论</h2>
+      <p>
+        {game.title} 的核心卖点是「{game.tags[0]}」与「{game.tags[1] ?? game.tags[0]}」，
+        属于 {game.category} 里偏 {game.price === 0 ? '免费体验' : '买断制'} 的一类。
+        如果你只有碎片时间、又不想被每日任务绑住，它的节奏是合适的。
+      </p>
+      <p class="quote">
+        适合：喜欢 {game.tags.join(' / ')} 的玩家。<br />
+        劝退：追求长线肝度、或者需要强社交驱动的玩家。
+      </p>
+      <p class="review-note">
+        本文为演示站占位文案，不对应真实产品；正式运营时请按「通用铁律」用可核实事实替换，并标注来源。
+      </p>
+    </section>
+
+    {recommend.length > 0 && (
+      <section class="related" aria-labelledby="related-title">
+        <div class="sec-head">
+          <h2 id="related-title">你可能也想看</h2>
+          <a class="link" href={withBase('/library/')}>全部游戏 <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="grid">
+          {recommend.map((g) => <GameCard game={g} />)}
+        </div>
+      </section>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .crumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-block: var(--sp-5);
+    font-size: 13px;
+    color: var(--ink-3);
+    flex-wrap: wrap;
+  }
+
+  .crumb a:hover {
+    color: var(--ink);
+  }
+
+  .crumb span[aria-current] {
+    color: var(--ink-2);
+  }
+
+  /* ---------- 上半部分：双栏 ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: var(--sp-7);
+    align-items: start;
+    padding-bottom: var(--sp-8);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero-media {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    background: #11131a;
+    aspect-ratio: 16 / 9;
+  }
+
+  .hero-media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-tagline {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.9);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .info-top {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+
+  .meta-line {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+
+  .title {
+    margin-top: var(--sp-3);
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.03em;
+  }
+
+  .lede {
+    margin-top: var(--sp-3);
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-4) var(--sp-5);
+    margin: var(--sp-5) 0;
+    padding: var(--sp-4) 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .fact dt {
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+
+  .fact dd {
+    margin: 3px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .fact-rating strong {
+    font-family: var(--mono);
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .fact-rating .max {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+
+  .pending {
+    color: var(--ink-3);
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .price {
+    font-family: var(--mono);
+    font-size: 18px;
+  }
+
+  .price-old {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: var(--sp-5);
+  }
+
+  .tiny {
+    margin-top: var(--sp-2);
+    font-size: 11px;
+    color: var(--ink-3);
+    text-align: center;
+  }
+
+  /* ---------- 截图 ---------- */
+  .shots-section {
+    padding-block: var(--sp-7);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-4);
+    flex-wrap: wrap;
+  }
+
+  .sec-head h2 {
+    font-size: 20px;
+  }
+
+  .sec-note {
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-3);
+  }
+
+  .shots :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  /* ---------- 正文 ---------- */
+  .review {
+    max-width: 68ch;
+    padding-block: var(--sp-7);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .review h2 {
+    font-size: 20px;
+    margin-bottom: var(--sp-4);
+  }
+
+  .review p {
+    margin-bottom: var(--sp-4);
+    color: var(--ink-2);
+    line-height: 1.85;
+  }
+
+  .review .quote {
+    padding-left: var(--sp-4);
+    border-left: 2px solid var(--accent);
+    color: var(--ink);
+  }
+
+  .review-note {
+    font-size: 12px !important;
+    color: var(--ink-3) !important;
+  }
+
+  .related {
+    padding-block: var(--sp-8) var(--sp-9);
+  }
+
+  @media (max-width: 899px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: var(--sp-5);
+      padding-bottom: var(--sp-6);
+    }
+    .hero-media {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .shots {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: var(--sp-3);
+      padding-bottom: var(--sp-2);
+      margin-inline: calc(var(--sp-4) * -1);
+      padding-inline: var(--sp-4);
+      scrollbar-width: thin;
+    }
+    .shots :global(img) {
+      flex: 0 0 82%;
+      scroll-snap-align: center;
+    }
+    .facts {
+      gap: var(--sp-4);
+    }
+  }
+</style>

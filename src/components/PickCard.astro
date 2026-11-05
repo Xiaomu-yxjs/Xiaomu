@@ -1,0 +1,87 @@
+---
+import { Image } from 'astro:assets';
+import { ratingText, priceText, type Game } from '../lib/games';
+import { getCover } from '../lib/images';
+import { withBase } from '../lib/base';
+
+interface Props {
+  game: Game;
+}
+
+const { game } = Astro.props;
+const cover = getCover(game.cover);
+---
+
+<a class="card pick" href={withBase(`/games/${game.slug}/`)}>
+  <div class="card-media">
+    <Image
+      src={cover}
+      alt={`${game.title} 封面`}
+      widths={[480, 720, 1200]}
+      sizes="(max-width: 639px) 100vw, (max-width: 1023px) 45vw, 380px"
+      loading="lazy"
+      decoding="async"
+    />
+    <span class="pick-flag">编辑精选</span>
+  </div>
+
+  <div class="card-body">
+    <div class="card-meta">
+      <span>{game.category}</span>
+      <span class="dot"></span>
+      <span>{game.players} 人在玩</span>
+      <span class="dot"></span>
+      <span>{priceText(game)}</span>
+    </div>
+
+    <h3 class="card-title">{game.title}</h3>
+    <p class="card-desc clamp-2">{game.description}</p>
+
+    <div class="card-tags">
+      {game.tags.slice(0, 3).map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+
+    <div class="card-foot">
+      <span class="rating">
+        <span class="rating-num">{ratingText(game.rating)}</span>
+        <span class="rating-max">{game.rating === null ? '' : ' / 10'}</span>
+      </span>
+      <span class="go">看测评 <span aria-hidden="true">→</span></span>
+    </div>
+  </div>
+</a>
+
+<style>
+  .pick {
+    min-height: 100%;
+  }
+
+  .pick-flag {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    padding-inline: 10px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.92);
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    backdrop-filter: blur(6px);
+  }
+
+  .card-desc {
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .go {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+</style>
