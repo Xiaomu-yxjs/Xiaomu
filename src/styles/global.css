@@ -184,28 +184,34 @@ button {
   white-space: nowrap;
 }
 
+/* 实心亮绿胶囊：和游戏库筛选栏的选中态一致，压在浅色封面上也清晰 */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   height: 24px;
-  padding-inline: 9px;
+  padding-inline: 10px;
+  border: 1px solid var(--accent);
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
-  background: var(--accent-soft);
+  font-weight: 700;
+  background: var(--accent);
   color: var(--accent-ink);
   white-space: nowrap;
+  box-shadow: 0 0 14px rgba(92, 224, 144, 0.45);
 }
 
 .badge--new {
-  background: #e8f6ef;
-  color: #0f7355;
+  background: #8ff0c0;
+  border-color: #8ff0c0;
+  color: #06291a;
 }
 
 .badge--hot {
-  background: var(--warm-soft);
-  color: var(--warm);
+  background: var(--warm);
+  border-color: var(--warm);
+  color: #2b1005;
+  box-shadow: 0 0 14px rgba(255, 138, 76, 0.4);
 }
 
 .rating {
@@ -409,6 +415,74 @@ button {
   border: 0;
 }
 
+/* ---------- 荧光团：与四叶草图标同色的发光小团 ---------- */
+/* 整层用文档坐标（absolute 到 body 起点），滚动时无需重算 */
+.firefly-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 90;
+  overflow: visible;
+}
+
+.firefly-trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+.firefly {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  will-change: transform, opacity;
+}
+
+.firefly-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--orb, 9px);
+  height: var(--orb, 9px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  /* 中心近白、主体荧光绿、外圈化开 —— 对齐四叶草发光图标 */
+  background: radial-gradient(
+    circle at 38% 34%,
+    #f2fff7 0%,
+    #c4ffd9 20%,
+    var(--accent) 46%,
+    rgba(92, 224, 144, 0.34) 72%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 10px 3px rgba(92, 224, 144, 0.5),
+    0 0 26px 9px rgba(92, 224, 144, 0.24);
+  animation: firefly-breathe var(--dur, 3.8s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+@keyframes firefly-breathe {
+  from {
+    opacity: 0.42;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.16);
+  }
+}
+
+.firefly.is-flying .firefly-dot {
+  animation: none;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -424,5 +498,10 @@ button {
   }
   .card:hover .card-media img {
     transform: none;
+  }
+  .firefly-dot {
+    animation: none !important;
+    opacity: 0.72;
+    transform: translate(-50%, -50%);
   }
 }
