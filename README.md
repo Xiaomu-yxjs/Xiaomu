@@ -1,14 +1,13 @@
-# 苜蓿草 · 手游测评站骨架
+# 苜蓿草 · 手游测评站
 
-按《游戏网站 AI 提示词库》落地的一套可运行骨架：Astro 静态站 + JSON 数据驱动，零服务器成本。
+按《游戏网站 AI 提示词库》落地的一套可运行站点：Astro 静态站 + JSON 数据驱动，零服务器成本，部署在 GitHub Pages。
 
-> ⚠️ 站内所有游戏名称、评分、在玩人数、价格、下载链接**均为占位虚构数据**，只用于演示结构与排版，不对应任何真实产品。
+> 站内只收录**真实游戏**：武林外传：十年之约、龙之谷启程、桃园：将帅录。图片、图标与下载链接均取自 3975 / 游戏官方站；未公布的数据一律显示「未公布 / 待定」，不编造。
 
 ## 快速开始
 
 ```bash
 npm install
-npm run images   # 生成占位封面/截图（首次或改数据后跑）
 npm run dev      # http://localhost:4321
 npm run build    # 产物在 dist/，应为 0 error
 npm run preview  # 本地预览构建产物
@@ -21,8 +20,9 @@ Node 版本要求：`>=22.23.4` 对应 Astro 7；本项目锁定 **Astro 5.18**�
 ```
 src/
 ├─ data/games.json         # 唯一数据源，改这里就够
-├─ assets/covers/*.jpg     # 12:5 扁横幅封面（脚本生成）
-├─ assets/shots/*.jpg      # 1280×720 截图（脚本生成）
+├─ assets/covers/*.jpg     # 官方封面 / 主视觉
+├─ assets/shots/*.jpg      # 官方游戏截图
+├─ assets/icons/*.png      # 官方方形 App 图标
 ├─ lib/games.ts            # 类型 + picks / categories / 价格评分格式化
 ├─ lib/images.ts           # glob 解析图片 → ImageMetadata，交给 <Image> 优化
 ├─ styles/global.css       # design tokens，单点定义
@@ -42,8 +42,10 @@ src/
 ## 加一款游戏（3 步）
 
 1. 在 `src/data/games.json` 追加一条记录（字段见下）。
-2. 跑 `npm run images` —— 自动生成 `<cover>.jpg` 与 `screenshots` 里列出的每张图。
+2. 从游戏官网取素材，按 `cover` / `icon` / `screenshots` 里的文件名放进 `src/assets/{covers,icons,shots}/`。封面与截图用 `.jpg`，图标支持 `.png` / `.jpg`。
 3. `npm run build`。详情页 `/games/<slug>/`、首页、游戏库、sitemap 全部自动更新。
+
+> 缺失的截图会被跳过、图标会自动隐藏；但 `cover` 必须有对应文件，否则构建报错。
 
 ### 数据字段
 
@@ -52,18 +54,19 @@ src/
 | `id` | string | ✅ | 内部唯一 ID |
 | `slug` | string | ✅ | URL 片段，同时是图片文件名 |
 | `title` | string | ✅ | 游戏名 |
-| `category` | string | ✅ | 决定筛选分类，同时决定占位图配色 |
+| `category` | string | ✅ | 决定筛选分类 |
 | `badge` | `pick` \| `new` \| `hot` | ✅ | `pick` 会进首页精品推荐（最多 3 款） |
 | `cover` | string | ✅ | 封面文件名（不含扩展名） |
-| `players` | string | ✅ | 在玩人数，直接展示，如 `12.4万` |
+| `icon` | string |  | 方形 App 图标文件名，缺省时卡片与详情页不显示图标 |
+| `players` | string | ✅ | 在玩人数；填 `未公布` 时显示「在玩人数未公布」 |
 | `description` | string | ✅ | 简介，卡片上 2 行截断，详情页全文 |
-| `platform` | string[] | ✅ | 如 `["iOS","Android"]` |
+| `platform` | string[] | ✅ | 如 `["Android","iOS","PC"]` |
 | `tags` | string[] | ✅ | 玩法标签，卡片取前 3 |
 | `rating` | number \| null | ✅ | `null` 时显示「待定」，不参与 JSON-LD 评分 |
 | `price` | number | ✅ | `0` 显示「免费」 |
 | `originalPrice` | number \| null | ✅ | 有值时显示划线价 |
-| `externalUrl` | string | ✅ | 下载外链，`rel="nofollow noopener"` |
-| `screenshots` | string[] | ✅ | 空数组时**详情页整段画廊自动隐藏**（见「深潜」） |
+| `externalUrl` | string | ✅ | 官方下载外链，`rel="nofollow noopener"` |
+| `screenshots` | string[] | ✅ | 空数组时详情页整段画廊自动隐藏 |
 
 > `price` / `originalPrice` 原提示词库的 schema 里漏了，详情页要划线价，这里补上。
 
@@ -71,17 +74,15 @@ src/
 
 - **卡片用线不用阴影**：`1px solid var(--line)`，hover 时 `translateY(-3px)` + 封面 `scale(1.04)`，无 box-shadow。
 - **断点**：360 / 768 / 1280；网格 3 列 → 2 列 → 1 列。
-- **图片**：全部走 `astro:assets`，构建时转 WebP 并按 `widths` 出 3 档 srcset（本次构建共 72 张变体，单图 16–19KB → 1–10KB）。
+- **图片**：全部走 `astro:assets`，构建时转 WebP 并按 `widths` 出多档 srcset。
 - **无 JS 也能用**：除筛选和二维码弹窗外，全部静态可读。
+- 游戏库筛选项由当前数据动态生成，不会出现点了必定零结果的类别 / 标记。
 
 ## 部署（GitHub Pages）
 
-`.github/workflows/deploy.yml` 已配好：推到 `main` 自动构建发布。仓库 Settings → Pages → Source 选 **GitHub Actions**。
+`.github/workflows/deploy.yml` 已配好：推到 `main` 自动构建发布。仓库 Settings → Pages → Source 选 **GitHub Actions**。线上地址：`https://xiaomu-yxjs.github.io/Xiaomu/`。
 
-上线前务必改两处（否则 canonical / sitemap 全指向 example.com）：
-
-1. `astro.config.mjs` 的 `site`
-2. `public/robots.txt` 里的 Sitemap 地址
+`astro.config.mjs` 的 `site` / `base` 与 `public/robots.txt` 里的 Sitemap 地址已按项目页路径配置；手写链接统一走 `withBase()`，避免 Pages 子路径 404。
 
 ### 域名红线（顺序不能错）
 
@@ -95,3 +96,4 @@ src/
 - 攻略/测评长文页（`/guides/[slug]`，MDX 或 Markdown 内容集）
 - 云端投稿 + 评论（`guides` / `comments` 两张表 + RLS，见提示词库第八节）
 - 百度主动推送脚本、图片 CDN 托管
+- 小程序二维码目前仍是占位图，接入真实小程序时替换 `public/images/mp-qr.svg`

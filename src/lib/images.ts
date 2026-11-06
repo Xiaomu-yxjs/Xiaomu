@@ -16,7 +16,7 @@ function pick(map: Record<string, { default: ImageMetadata }>, name: string): Im
   const mod = map[`../assets/${name}.jpg`];
   if (!mod) {
     throw new Error(
-      `找不到图片 ${name}.jpg。请先运行 \`npm run images\` 生成占位图，或检查 data/games.json 里的文件名。`,
+      `找不到图片 ${name}.jpg。请把官方素材放进 src/assets/，或检查 data/games.json 里的文件名。`,
     );
   }
   return mod.default;

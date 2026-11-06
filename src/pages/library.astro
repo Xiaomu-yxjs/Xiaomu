@@ -3,11 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import GameCard from '../components/GameCard.astro';
 import { BADGE_LABEL, categories, games } from '../lib/games';
 
+// 只展示当前确实存在的标记，避免出现点了必定零结果的筛选项
+const usedBadges = [...new Set(games.map((g) => g.badge))];
 const badges = [
   { value: 'all', label: '全部' },
-  { value: 'pick', label: BADGE_LABEL.pick },
-  { value: 'new', label: BADGE_LABEL.new },
-  { value: 'hot', label: BADGE_LABEL.hot },
+  ...usedBadges.map((b) => ({ value: b, label: BADGE_LABEL[b] })),
 ];
 ---
 
