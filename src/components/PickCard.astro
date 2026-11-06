@@ -20,7 +20,7 @@ const icon = getIcon(game.icon);
       alt={`${game.title} 封面`}
       widths={[480, 720, 1200]}
       sizes="(max-width: 639px) 100vw, (max-width: 1023px) 45vw, 380px"
-      loading="lazy"
+      loading="eager"
       decoding="async"
     />
     {icon && (
@@ -30,7 +30,7 @@ const icon = getIcon(game.icon);
         alt={`${game.title} 图标`}
         widths={[96, 144]}
         sizes="72px"
-        loading="lazy"
+        loading="eager"
         decoding="async"
       />
     )}
