@@ -2,7 +2,8 @@
 const fs = await import('node:fs');
 const WS = globalThis.WebSocket;
 
-const [url, width, height, out] = process.argv.slice(2);
+const [url, width, height, out, waitArg] = process.argv.slice(2);
+const waitMs = Number(waitArg) || 1600;
 const PORT = 9333;
 
 const listRes = await fetch(`http://localhost:${PORT}/json/new?`, { method: 'PUT' });
@@ -37,7 +38,8 @@ await send('Emulation.setDeviceMetricsOverride', {
   mobile: Number(width) < 600,
 });
 await send('Page.navigate', { url });
-await new Promise((r) => setTimeout(r, 1600));
+// 第 5 个参数可指定额外等待毫秒数，便于等图片/字体加载完再截图
+await new Promise((r) => setTimeout(r, waitMs));
 
 const { result } = await send('Page.captureScreenshot', {
   format: 'png',
