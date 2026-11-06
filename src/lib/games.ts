@@ -40,3 +40,8 @@ export function ratingText(rating: number | null): string {
 export function priceText(game: Game): string {
   return game.price === 0 ? '免费' : `¥${game.price}`;
 }
+
+/** 官网未公布在玩人数时，避免出现「未公布 人在玩」这种别扭文案 */
+export function playersText(game: Game): string {
+  return game.players === '未公布' ? '在玩人数未公布' : `${game.players} 人在玩`;
+}

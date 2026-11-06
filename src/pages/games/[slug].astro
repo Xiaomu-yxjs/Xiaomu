@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GameCard from '../../components/GameCard.astro';
-import { BADGE_LABEL, games, priceText, ratingText, type Game } from '../../lib/games';
+import { BADGE_LABEL, games, priceText, playersText, ratingText, type Game } from '../../lib/games';
 import { getCover, getShots, getIcon } from '../../lib/images';
 import { withBase } from '../../lib/base';
 
@@ -97,7 +97,7 @@ const jsonLd = {
       <div class="hero-info">
         <div class="info-top">
           <span class={`badge badge--${game.badge}`}>{BADGE_LABEL[game.badge]}</span>
-          <span class="meta-line">{game.players} 人在玩</span>
+          <span class="meta-line">{playersText(game)}</span>
         </div>
 
         <h1 class="title">{game.title}</h1>
