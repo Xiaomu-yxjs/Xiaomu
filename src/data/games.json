@@ -1,5 +1,23 @@
 [
   {
+    "id": "g007",
+    "slug": "taoyuan",
+    "title": "桃园：将帅录",
+    "category": "角色扮演",
+    "badge": "pick",
+    "cover": "taoyuan",
+    "icon": "taoyuan",
+    "players": "10万+",
+    "description": "经典三国题材 MMORPG，采用 ATB 时序回合战斗，保留武将招募、将军令收集、阵法博弈等经典玩法。支持安卓 / iOS / PC 三端数据互通，主打公平透明的运营模式，装备主要靠副本掉落与打怪获取。",
+    "platform": ["Android", "iOS", "PC"],
+    "tags": ["回合制", "三国", "MMORPG", "怀旧"],
+    "rating": 8.4,
+    "price": 0,
+    "originalPrice": null,
+    "externalUrl": "https://ty.3975.com/download/sao",
+    "screenshots": ["taoyuan-1", "taoyuan-2", "taoyuan-3", "taoyuan-4"]
+  },
+  {
     "id": "g001",
     "slug": "stellar-expedition",
     "title": "星海远征",

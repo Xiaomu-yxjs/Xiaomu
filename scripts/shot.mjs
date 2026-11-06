@@ -5,7 +5,7 @@ const WS = globalThis.WebSocket;
 const [url, width, height, out] = process.argv.slice(2);
 const PORT = 9333;
 
-const listRes = await fetch(`http://127.0.0.1:${PORT}/json/new?`, { method: 'PUT' });
+const listRes = await fetch(`http://localhost:${PORT}/json/new?`, { method: 'PUT' });
 const target = await listRes.json();
 const ws = new WS(target.webSocketDebuggerUrl);
 

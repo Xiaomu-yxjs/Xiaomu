@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { BADGE_LABEL, priceText, ratingText, type Game } from '../lib/games';
-import { getCover } from '../lib/images';
+import { getCover, getIcon } from '../lib/images';
 import { withBase } from '../lib/base';
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
 
 const { game } = Astro.props;
 const cover = getCover(game.cover);
+const icon = getIcon(game.icon);
 const badgeClass = `badge badge--${game.badge}`;
 ---
 
@@ -30,6 +31,17 @@ const badgeClass = `badge badge--${game.badge}`;
         decoding="async"
       />
       <span class={badgeClass}>{BADGE_LABEL[game.badge]}</span>
+      {icon && (
+        <Image
+          class="card-icon"
+          src={icon}
+          alt={`${game.title} 图标`}
+          widths={[96, 144]}
+          sizes="72px"
+          loading="lazy"
+          decoding="async"
+        />
+      )}
     </div>
 
     <div class="card-body">
@@ -71,6 +83,19 @@ const badgeClass = `badge badge--${game.badge}`;
     position: absolute;
     top: 10px;
     left: 10px;
+  }
+
+  .game-card :global(.card-icon) {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 2px solid rgb(255 255 255 / 0.85);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.45), var(--glow);
+    background: #0d1410;
   }
 
   .card-link {

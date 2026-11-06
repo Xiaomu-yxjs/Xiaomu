@@ -8,6 +8,10 @@ const shots = import.meta.glob<{ default: ImageMetadata }>('../assets/shots/*.jp
   eager: true,
 });
 
+const icons = import.meta.glob<{ default: ImageMetadata }>('../assets/icons/*.{jpg,png}', {
+  eager: true,
+});
+
 function pick(map: Record<string, { default: ImageMetadata }>, name: string): ImageMetadata {
   const mod = map[`../assets/${name}.jpg`];
   if (!mod) {
@@ -30,4 +34,13 @@ export function getShot(name: string): ImageMetadata | undefined {
 
 export function getShots(names: string[]): ImageMetadata[] {
   return names.map(getShot).filter((s): s is ImageMetadata => Boolean(s));
+}
+
+/** 拿到游戏图标的 ImageMetadata（App 图标），没有时返回 undefined */
+export function getIcon(name?: string): ImageMetadata | undefined {
+  if (!name) return undefined;
+  return (
+    icons[`../assets/icons/${name}.png`]?.default ??
+    icons[`../assets/icons/${name}.jpg`]?.default
+  );
 }

@@ -9,6 +9,7 @@ export interface Game {
   category: string;
   badge: Badge;
   cover: string;
+  icon?: string;
   players: string;
   description: string;
   platform: string[];

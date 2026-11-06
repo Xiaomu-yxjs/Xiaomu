@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GameCard from '../../components/GameCard.astro';
 import { BADGE_LABEL, games, priceText, ratingText, type Game } from '../../lib/games';
-import { getCover, getShots } from '../../lib/images';
+import { getCover, getShots, getIcon } from '../../lib/images';
 import { withBase } from '../../lib/base';
 
 export function getStaticPaths() {
@@ -16,6 +16,7 @@ interface Props {
 
 const { game } = Astro.props;
 const cover = getCover(game.cover);
+const icon = getIcon(game.icon);
 const shots = getShots(game.screenshots);
 const related = games.filter((g) => g.slug !== game.slug && g.category === game.category).slice(0, 3);
 const fallbackRelated = games.filter((g) => g.slug !== game.slug).slice(0, 3);
@@ -81,6 +82,17 @@ const jsonLd = {
           fetchpriority="high"
         />
         <span class="hero-tagline">{game.category}</span>
+        {icon && (
+          <Image
+            class="hero-icon"
+            src={icon}
+            alt={`${game.title} 图标`}
+            widths={[160, 240]}
+            sizes="104px"
+            loading="eager"
+            decoding="async"
+          />
+        )}
       </div>
 
       <div class="hero-info">
@@ -135,7 +147,7 @@ const jsonLd = {
         >
           前往下载页 <span aria-hidden="true">↗</span>
         </a>
-        <p class="tiny">外部链接，示例地址不含真实下载内容。</p>
+        <p class="tiny">外部链接，请认准官方渠道下载。</p>
       </div>
     </header>
 
@@ -233,6 +245,29 @@ const jsonLd = {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .hero-media :global(.hero-icon) {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    width: 104px;
+    height: 104px;
+    border-radius: 24px;
+    object-fit: cover;
+    border: 3px solid rgb(255 255 255 / 0.9);
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.5), var(--glow-strong);
+    background: #0d1410;
+  }
+
+  @media (max-width: 899px) {
+    .hero-media :global(.hero-icon) {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      left: 12px;
+      bottom: 12px;
+    }
   }
 
   .hero-tagline {
