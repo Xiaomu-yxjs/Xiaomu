@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { ratingText, priceText, playersText, type Game } from '../lib/games';
+import { ratingText, type Game } from '../lib/games';
 import { getCover, getIcon } from '../lib/images';
 import { withBase } from '../lib/base';
 
@@ -40,9 +40,7 @@ const icon = getIcon(game.icon);
     <div class="card-meta">
       <span>{game.category}</span>
       <span class="dot"></span>
-      <span>{playersText(game)}</span>
-      <span class="dot"></span>
-      <span>{priceText(game)}</span>
+      <span>{game.platform.join(' · ')}</span>
     </div>
 
     <h3 class="card-title">{game.title}</h3>
@@ -55,7 +53,7 @@ const icon = getIcon(game.icon);
     <div class="card-foot">
       <span class="rating">
         <span class="rating-num">{ratingText(game.rating)}</span>
-        <span class="rating-max">{game.rating === null ? '' : ' / 10'}</span>
+        <span class="rating-max"> / 10</span>
       </span>
       <span class="go">看测评 <span aria-hidden="true">→</span></span>
     </div>
@@ -89,6 +87,6 @@ const icon = getIcon(game.icon);
   .go {
     font-size: 13px;
     font-weight: 600;
-    color: var(--accent-ink);
+    color: var(--accent);
   }
 </style>

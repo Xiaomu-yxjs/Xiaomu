@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GameCard from '../../components/GameCard.astro';
-import { BADGE_LABEL, games, priceText, playersText, ratingText, type Game } from '../../lib/games';
+import { BADGE_LABEL, games, ratingText, type Game } from '../../lib/games';
 import { getCover, getShots, getIcon } from '../../lib/images';
 import { withBase } from '../../lib/base';
 
@@ -35,27 +35,13 @@ const jsonLd = {
   description: game.description,
   image: coverUrl,
   url: new URL(`/games/${game.slug}/`, Astro.site ?? 'https://example.com').href,
-  ...(game.rating !== null
-    ? {
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: game.rating,
-          bestRating: 10,
-          worstRating: 0,
-          ratingCount: 1,
-        },
-      }
-    : {}),
-  ...(game.price > 0
-    ? {
-        offers: {
-          '@type': 'Offer',
-          price: game.price,
-          priceCurrency: 'CNY',
-          availability: 'https://schema.org/InStock',
-        },
-      }
-    : {}),
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: game.rating,
+    bestRating: 10,
+    worstRating: 0,
+    ratingCount: 1,
+  },
 };
 ---
 
@@ -97,7 +83,6 @@ const jsonLd = {
       <div class="hero-info">
         <div class="info-top">
           <span class={`badge badge--${game.badge}`}>{BADGE_LABEL[game.badge]}</span>
-          <span class="meta-line">{playersText(game)}</span>
         </div>
 
         <h1 class="title">{game.title}</h1>
@@ -107,22 +92,13 @@ const jsonLd = {
           <div class="fact">
             <dt>评分</dt>
             <dd class="fact-rating">
-              {game.rating === null ? (
-                <span class="pending">待定</span>
-              ) : (
-                <>
-                  <strong>{ratingText(game.rating)}</strong>
-                  <span class="max">/ 10</span>
-                </>
-              )}
+              <strong>{ratingText(game.rating)}</strong>
+              <span class="max">/ 10</span>
             </dd>
           </div>
           <div class="fact">
-            <dt>价格</dt>
-            <dd>
-              <span class="price">{priceText(game)}</span>
-              {game.originalPrice && <s class="price-old">¥{game.originalPrice}</s>}
-            </dd>
+            <dt>资料来源</dt>
+            <dd>官方公开资料</dd>
           </div>
           <div class="fact">
             <dt>平台</dt>
@@ -176,7 +152,7 @@ const jsonLd = {
       <h2 id="review-title">先说结论</h2>
       <p>
         {game.title} 的核心卖点是「{game.tags[0]}」与「{game.tags[1] ?? game.tags[0]}」，
-        属于 {game.category} 里偏 {game.price === 0 ? '免费体验' : '买断制'} 的一类。
+        整体走的是 {game.category} 里偏轻松上手的路线。
         如果你只有碎片时间、又不想被每日任务绑住，它的节奏是合适的。
       </p>
       <p class="quote">
@@ -276,11 +252,6 @@ const jsonLd = {
     gap: var(--sp-3);
   }
 
-  .meta-line {
-    font-size: 13px;
-    color: var(--ink-3);
-  }
-
   .title {
     margin-top: var(--sp-3);
     font-size: clamp(28px, 4vw, 40px);
@@ -330,23 +301,6 @@ const jsonLd = {
     font-size: 12px;
     color: var(--ink-3);
     font-weight: 500;
-  }
-
-  .pending {
-    color: var(--ink-3);
-    font-weight: 500;
-    font-size: 14px;
-  }
-
-  .price {
-    font-family: var(--mono);
-    font-size: 18px;
-  }
-
-  .price-old {
-    font-weight: 400;
-    font-size: 12px;
-    color: var(--ink-3);
   }
 
   .tags {

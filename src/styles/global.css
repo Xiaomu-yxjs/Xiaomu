@@ -226,11 +226,6 @@ button {
   letter-spacing: -0.01em;
 }
 
-.rating--pending {
-  color: var(--ink-3);
-  font-weight: 500;
-}
-
 .rating-num {
   color: var(--ink);
 }

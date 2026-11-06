@@ -23,12 +23,12 @@ src/
 ├─ assets/covers/*.jpg     # 官方封面 / 主视觉
 ├─ assets/shots/*.jpg      # 官方游戏截图
 ├─ assets/icons/*.png      # 官方方形 App 图标
-├─ lib/games.ts            # 类型 + picks / categories / 价格评分格式化
+├─ lib/games.ts            # 类型 + picks / categories / 评分格式化与随机生成
 ├─ lib/images.ts           # glob 解析图片 → ImageMetadata，交给 <Image> 优化
 ├─ styles/global.css       # design tokens，单点定义
 ├─ components/
 │  ├─ SiteHeader.astro
-│  ├─ SiteFooter.astro     # 含数据免责声明 + 小程序二维码弹窗
+│  ├─ SiteFooter.astro     # 含数据免责声明
 │  ├─ PickCard.astro       # 首页精选（扁横幅 + 2 行截断）
 │  └─ GameCard.astro       # 游戏库卡片（带 data-* 供前端筛选）
 ├─ layouts/BaseLayout.astro # title/description/canonical/OG 全在这里
@@ -58,24 +58,21 @@ src/
 | `badge` | `pick` \| `new` \| `hot` | ✅ | `pick` 会进首页精品推荐（最多 3 款） |
 | `cover` | string | ✅ | 封面文件名（不含扩展名） |
 | `icon` | string |  | 方形 App 图标文件名，缺省时卡片与详情页不显示图标 |
-| `players` | string | ✅ | 在玩人数；填 `未公布` 时显示「在玩人数未公布」 |
 | `description` | string | ✅ | 简介，卡片上 2 行截断，详情页全文 |
 | `platform` | string[] | ✅ | 如 `["Android","iOS","PC"]` |
 | `tags` | string[] | ✅ | 玩法标签，卡片取前 3 |
-| `rating` | number \| null | ✅ | `null` 时显示「待定」，不参与 JSON-LD 评分 |
-| `price` | number | ✅ | `0` 显示「免费」 |
-| `originalPrice` | number \| null | ✅ | 有值时显示划线价 |
+| `rating` | number | ✅ | 评分，统一在 8.0 以上；缺填或低于 8.0 时 `lib/games.ts` 按 slug 随机生成 8.1~9.8 |
 | `externalUrl` | string | ✅ | 官方下载外链，`rel="nofollow noopener"` |
 | `screenshots` | string[] | ✅ | 空数组时详情页整段画廊自动隐藏 |
 
-> `price` / `originalPrice` 原提示词库的 schema 里漏了，详情页要划线价，这里补上。
+> 不展示在玩人数、价格与「免费」字样，也不再提供微信小程序入口；`players` / `price` / `originalPrice` 字段已从 schema 移除。
 
 ## 设计约定
 
 - **卡片用线不用阴影**：`1px solid var(--line)`，hover 时 `translateY(-3px)` + 封面 `scale(1.04)`，无 box-shadow。
 - **断点**：360 / 768 / 1280；网格 3 列 → 2 列 → 1 列。
 - **图片**：全部走 `astro:assets`，构建时转 WebP 并按 `widths` 出多档 srcset。
-- **无 JS 也能用**：除筛选和二维码弹窗外，全部静态可读。
+- **无 JS 也能用**：除筛选外，全部静态可读。
 - 游戏库筛选项由当前数据动态生成，不会出现点了必定零结果的类别 / 标记。
 - **环境荧光团**：`src/scripts/fireflies.ts` 全局注入。光团是「白芯 → 黄绿 → 荧光绿」的朦胧光球，像呼吸一样渐明渐暗；不附着任何卡片 / 标签框，而是固定在视口内、以每秒约 2.5~7px 极缓慢地随机漂移，靠近屏幕边缘会缓缓转身。每个光团带一圈大范围极淡柔光，微微照亮周围。没有点击飞行动画、也不绘制任何轨迹（避免断续光带），点击卡片链接不再延迟跳转。`prefers-reduced-motion` 下静止；切到后台暂停动画。
 - **光团性能**：光团不是实时 `radial-gradient`，而是 `public/images/firefly.webp` 的预渲染位图（约 4KB，另有 `firefly.png` 无损母版），浏览器只需贴图合成；位移更新节流到约 30fps；数量按视口面积限制在 8~14 个。原先 21 个渐变 + `mix-blend-mode: screen` 每帧要与整页重新混合，是滚动掉帧的主因。
@@ -104,4 +101,3 @@ src/
 - 攻略/测评长文页（`/guides/[slug]`，MDX 或 Markdown 内容集）
 - 云端投稿 + 评论（`guides` / `comments` 两张表 + RLS，见提示词库第八节）
 - 百度主动推送脚本、图片 CDN 托管
-- 小程序二维码目前仍是占位图，接入真实小程序时替换 `public/images/mp-qr.svg`
