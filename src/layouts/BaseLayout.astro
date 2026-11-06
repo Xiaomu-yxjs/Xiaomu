@@ -28,6 +28,14 @@ const siteName = '苜蓿草 CLOVER';
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    {/* 背景图是首屏最大资源：提前到 HTML 解析阶段高优先级请求，不等 CSS 下载完 */}
+    <link
+      rel="preload"
+      as="image"
+      href={withBase('/images/site-bg.webp')}
+      type="image/webp"
+      fetchpriority="high"
+    />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={siteName} />
@@ -41,7 +49,7 @@ const siteName = '苜蓿草 CLOVER';
     <meta name="theme-color" content="#0a2417" />
     <slot name="head" />
   </head>
-  <body style={`--clover-bg: url('${withBase('/images/site-bg.jpg')}')`}>
+  <body style={`--clover-bg: url('${withBase('/images/site-bg.webp')}'); --firefly-img: url('${withBase('/images/firefly.webp')}')`}>
     <a class="skip" href="#main">跳到主内容</a>
     <SiteHeader />
     <main id="main">

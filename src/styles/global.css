@@ -63,7 +63,12 @@ html {
 body {
   margin: 0;
   background-color: var(--bg);
-  background-image: linear-gradient(rgba(5, 22, 14, 0.62), rgba(5, 22, 14, 0.62)), var(--clover-bg, none);
+  /* 三层：深色遮罩 / 高清背景 / 内联 84 字节模糊占位。
+     高清图未到达时自动透出占位层，背景不会「空白等待」。 */
+  background-image:
+    linear-gradient(rgba(5, 22, 14, 0.62), rgba(5, 22, 14, 0.62)),
+    var(--clover-bg, none),
+    url('data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAAAQAwCdASogABIAPt1orVCopaQnKAgBEBuJZwDKABaoSgAA/vBqgUNF6JoHFxMsafDv8nvB5Sjvs/sIEBsrAAAA');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -431,51 +436,24 @@ button {
   top: 0;
   width: 0;
   height: 0;
+  /* 提升为独立合成层：漂移只更新 transform，不触发整页重绘 */
+  will-change: transform;
   /* 呼吸：整团（核心 + 柔光）一起缓缓渐明渐暗 */
   animation: firefly-breathe var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
 }
 
-/* 大范围柔光：screen 混合，让周围的草地 / 卡片被微弱的光照亮 */
-.firefly-glow {
+/* 光团是一张预渲染的位图（小亮核 + 大范围柔光），浏览器只需贴图合成。
+   之前每帧重绘 21 个 radial-gradient + mix-blend-mode 是滚动掉帧的主因。 */
+.firefly-orb {
   position: absolute;
   left: 0;
   top: 0;
-  width: var(--halo, 240px);
-  height: var(--halo, 240px);
-  border-radius: 50%;
+  width: var(--halo, 220px);
+  height: var(--halo, 220px);
   transform: translate(-50%, -50%);
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(214, 255, 156, 0.17) 0%,
-    rgba(158, 242, 120, 0.1) 24%,
-    rgba(92, 224, 144, 0.05) 48%,
-    rgba(60, 180, 96, 0.018) 72%,
-    transparent 100%
-  );
-  mix-blend-mode: screen;
-  animation: firefly-halo var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
-}
-
-/* 光团本体：白芯 → 黄绿 → 四叶草荧光绿 → 化进背景，全程无硬边 */
-.firefly-dot {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: var(--orb, 20px);
-  height: var(--orb, 20px);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(255, 255, 242, 1) 0%,
-    rgba(250, 255, 186, 0.98) 8%,
-    rgba(226, 255, 92, 0.9) 19%,
-    rgba(166, 240, 72, 0.55) 34%,
-    rgba(92, 224, 144, 0.26) 55%,
-    rgba(60, 180, 96, 0.08) 76%,
-    transparent 100%
-  );
-  filter: blur(2.5px);
+  background-image: var(--firefly-img);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
 @keyframes firefly-breathe {
@@ -485,16 +463,6 @@ button {
   }
   50% {
     opacity: 1;
-  }
-}
-
-@keyframes firefly-halo {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(0.84);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.14);
   }
 }
 
@@ -517,9 +485,5 @@ button {
   .firefly {
     animation: none !important;
     opacity: 0.66;
-  }
-  .firefly-glow {
-    animation: none !important;
-    transform: translate(-50%, -50%);
   }
 }

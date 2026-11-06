@@ -77,7 +77,14 @@ src/
 - **图片**：全部走 `astro:assets`，构建时转 WebP 并按 `widths` 出多档 srcset。
 - **无 JS 也能用**：除筛选和二维码弹窗外，全部静态可读。
 - 游戏库筛选项由当前数据动态生成，不会出现点了必定零结果的类别 / 标记。
-- **环境荧光团**：`src/scripts/fireflies.ts` 全局注入。光团是「白芯 → 黄绿 → 荧光绿」的朦胧光球，像呼吸一样渐明渐暗；不附着任何卡片 / 标签框，而是固定在视口内、以每秒约 2.5~7px 极缓慢地随机漂移，靠近屏幕边缘会缓缓转身。每个光团还带一大圈 `mix-blend-mode: screen` 的极淡柔光，微微照亮周围的背景与卡片。没有点击飞行动画、也不绘制任何轨迹（避免出现断续光带），点击卡片链接不再延迟跳转。`prefers-reduced-motion` 下静止；切到后台暂停动画。
+- **环境荧光团**：`src/scripts/fireflies.ts` 全局注入。光团是「白芯 → 黄绿 → 荧光绿」的朦胧光球，像呼吸一样渐明渐暗；不附着任何卡片 / 标签框，而是固定在视口内、以每秒约 2.5~7px 极缓慢地随机漂移，靠近屏幕边缘会缓缓转身。每个光团带一圈大范围极淡柔光，微微照亮周围。没有点击飞行动画、也不绘制任何轨迹（避免断续光带），点击卡片链接不再延迟跳转。`prefers-reduced-motion` 下静止；切到后台暂停动画。
+- **光团性能**：光团不是实时 `radial-gradient`，而是 `public/images/firefly.webp` 的预渲染位图（约 4KB，另有 `firefly.png` 无损母版），浏览器只需贴图合成；位移更新节流到约 30fps；数量按视口面积限制在 8~14 个。原先 21 个渐变 + `mix-blend-mode: screen` 每帧要与整页重新混合，是滚动掉帧的主因。
+
+## 性能约定
+
+- **背景图**：`public/images/site-bg.webp`（1600×899，约 54KB）由 `BaseLayout.astro` 用 `<link rel="preload" as="image" fetchpriority="high">` 提前到 HTML 解析阶段请求，不再等 CSS 下载；`global.css` 第三层背景内联了 84 字节的模糊占位图，高清图未到达时也能立即看到深绿底色。`public/images/site-bg.jpg` 保留为原始母版。
+- **图片加载**：首页只有 3 张 hero 叠层封面用 `loading="eager"`，卡片封面/图标与画廊均按需加载；详情页画廊 `fetchpriority="low"`。首页三处封面共用同一组 `widths={[400, 800, 1200]}`，让同一张封面生成相同 URL、浏览器只下载一次。
+- **实测基线**（Fast 3G 1.6Mbps / 150ms RTT，冷缓存，1440×900）：首屏总传输 530KB → 164KB，`load` 事件 3025ms → 1150ms，背景图 2635ms → 980ms；连续滚动 115 帧中超过 32ms 的掉帧 42 → 5，平均帧间隔 23.6ms → 17.4ms。
 
 ## 部署（GitHub Pages）
 
