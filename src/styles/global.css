@@ -64,10 +64,10 @@ body {
   margin: 0;
   background-color: var(--bg);
   background-image: linear-gradient(rgba(5, 22, 14, 0.62), rgba(5, 22, 14, 0.62)), var(--clover-bg, none);
-  background-size: auto;
+  background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  background-repeat: repeat;
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font);
   font-size: 16px;
