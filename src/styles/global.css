@@ -432,6 +432,8 @@ button {
   left: 0;
   top: 0;
   pointer-events: none;
+  /* 整条轨迹统一柔化，只留下朦胧的光雾，不出现清晰细线 */
+  filter: blur(4px);
 }
 
 .firefly {
@@ -447,40 +449,42 @@ button {
   position: absolute;
   left: 0;
   top: 0;
-  width: var(--orb, 9px);
-  height: var(--orb, 9px);
+  width: var(--orb, 26px);
+  height: var(--orb, 26px);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  /* 中心近白、主体荧光绿、外圈化开 —— 对齐四叶草发光图标 */
+  /* 朦胧光球：白芯 → 黄绿 → 四叶草荧光绿 → 化进背景，全程无硬边 */
   background: radial-gradient(
-    circle at 38% 34%,
-    #f2fff7 0%,
-    #c4ffd9 20%,
-    var(--accent) 46%,
-    rgba(92, 224, 144, 0.34) 72%,
+    circle at 50% 50%,
+    rgba(255, 255, 242, 1) 0%,
+    rgba(250, 255, 186, 0.98) 8%,
+    rgba(226, 255, 92, 0.9) 19%,
+    rgba(166, 240, 72, 0.55) 34%,
+    rgba(92, 224, 144, 0.26) 55%,
+    rgba(60, 180, 96, 0.08) 76%,
     transparent 100%
   );
-  box-shadow:
-    0 0 10px 3px rgba(92, 224, 144, 0.5),
-    0 0 26px 9px rgba(92, 224, 144, 0.24);
-  animation: firefly-breathe var(--dur, 3.8s) ease-in-out var(--delay, 0s) infinite alternate;
+  filter: blur(2.5px);
+  animation: firefly-breathe var(--dur, 5.4s) ease-in-out var(--delay, 0s) infinite;
 }
 
+/* 呼吸：整团亮度与大小一起缓缓涨落，明暗差拉大 */
 @keyframes firefly-breathe {
-  from {
-    opacity: 0.42;
-    transform: translate(-50%, -50%) scale(0.8);
+  0%,
+  100% {
+    opacity: 0.16;
+    transform: translate(-50%, -50%) scale(0.72);
   }
-  to {
+  50% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.16);
+    transform: translate(-50%, -50%) scale(1.12);
   }
 }
 
 .firefly.is-flying .firefly-dot {
   animation: none;
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1.1);
+  transform: translate(-50%, -50%) scale(1.05);
 }
 
 @media (prefers-reduced-motion: reduce) {

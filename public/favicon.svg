@@ -19,7 +19,6 @@
       <path transform="rotate(90)"  d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
       <path transform="rotate(180)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
       <path transform="rotate(270)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z"/>
-      <path d="M0 8 C 0 13 -2 17 -5 21" stroke="url(#cl)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
     </g>
   </g>
 </svg>

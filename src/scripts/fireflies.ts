@@ -1,15 +1,15 @@
 /**
  * 荧光团（全局交互）
- * - 在卡片 / 标签 / 筛选框等「框」的边缘常驻 1~2 个发光小团
- * - 点击框时，光团沿弧线飞向另一个框，途中拖出一条光带
- * - 落点后光带与光团缓缓淡出，原框再补一个新的静态光团
- * - 配色取自四叶草发光图标：--accent #5ce090，中心近白、外圈化开
+ * - 在卡片 / 标签组 / 筛选框等「框」的边缘常驻朦胧光团，像呼吸一样渐明渐暗
+ * - 点击框时，1~2 个光团沿随机曲线飞向另一个随机框，拖出朦胧光雾轨迹，随后缓缓淡出
+ * - 光团：白芯 → 黄绿 → 四叶草荧光绿 → 化进背景，全程无硬边
+ * - 密集标签按「组」计一个框，并做最小间距限制，避免一堆小框挤满光点
  *
  * 整层用文档坐标（absolute 定位在 body 起点），滚动时无需重算位置。
  */
 
 const SELECTOR =
-  '.card, .art-card, .chip, .tag, .badge, .btn, .filter, .facts, .hero-media, .shots';
+  '.card, .art-card, .card-tags, .tags, .chips, .btn, .filter, .facts, .hero-media, .shots';
 
 type Edge = 'top' | 'right' | 'bottom' | 'left';
 type Point = { x: number; y: number };
@@ -36,7 +36,8 @@ interface Flight {
   orb: Orb;
   from: Point;
   to: Point;
-  ctrl: Point;
+  c1: Point;
+  c2: Point;
   startedAt: number;
   duration: number;
   fadeMs: number;
@@ -49,6 +50,7 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 const MAX_FRAMES = 48;
 const MAX_FLIGHTS = 8;
+const MIN_GAP = 62;
 
 const layer = document.createElement('div');
 layer.className = 'firefly-layer';
@@ -99,7 +101,7 @@ const randomEdge = (): Edge => EDGES[Math.floor(Math.random() * EDGES.length)];
 
 /** 框边缘外侧的一点，t 是沿该边的位置比例 */
 function pointAt(r: Rect, edge: Edge, t: number): Point {
-  const off = 5;
+  const off = 6;
   switch (edge) {
     case 'top':
       return { x: r.left + r.width * t, y: r.top - off };
@@ -112,28 +114,43 @@ function pointAt(r: Rect, edge: Edge, t: number): Point {
   }
 }
 
+/** 相邻小框不再各挂一个光点，保持画面稀疏 */
+function tooClose(p: Point): boolean {
+  for (const frame of frames) {
+    for (const orb of frame.orbs) {
+      if (Math.hypot(orb.home.x - p.x, orb.home.y - p.y) < MIN_GAP) return true;
+    }
+  }
+  return false;
+}
+
 function spawnOrb(frame: Frame): boolean {
   const rect = docRect(frame.el);
   if (!rect) return false;
 
-  const size = frame.kind === 'small' ? 6 + Math.random() * 2 : 9 + Math.random() * 3;
-  const edge = randomEdge();
-  const t = 0.16 + Math.random() * 0.68;
-  const home = pointAt(rect, edge, t);
+  // 最多换 4 个边位置找一个不与已有光团挤在一起的点
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const edge = randomEdge();
+    const t = 0.16 + Math.random() * 0.68;
+    const home = pointAt(rect, edge, t);
+    if (tooClose(home)) continue;
 
-  const el = document.createElement('div');
-  el.className = 'firefly';
-  el.style.setProperty('--orb', `${size.toFixed(1)}px`);
-  el.style.setProperty('--dur', `${(2.8 + Math.random() * 2.6).toFixed(2)}s`);
-  el.style.setProperty('--delay', `${(-Math.random() * 4).toFixed(2)}s`);
-  el.style.transform = `translate(${home.x}px, ${home.y}px)`;
-  const dot = document.createElement('span');
-  dot.className = 'firefly-dot';
-  el.appendChild(dot);
-  layer.appendChild(el);
+    const size = frame.kind === 'small' ? 20 + Math.random() * 6 : 28 + Math.random() * 8;
+    const el = document.createElement('div');
+    el.className = 'firefly';
+    el.style.setProperty('--orb', `${size.toFixed(1)}px`);
+    el.style.setProperty('--dur', `${(4.2 + Math.random() * 2.6).toFixed(2)}s`);
+    el.style.setProperty('--delay', `${(-Math.random() * 6).toFixed(2)}s`);
+    el.style.transform = `translate(${home.x}px, ${home.y}px)`;
+    const dot = document.createElement('span');
+    dot.className = 'firefly-dot';
+    el.appendChild(dot);
+    layer.appendChild(el);
 
-  frame.orbs.push({ el, frame, edge, t, home, flying: false });
-  return true;
+    frame.orbs.push({ el, frame, edge, t, home, flying: false });
+    return true;
+  }
+  return false;
 }
 
 function fillOrbs(frame: Frame) {
@@ -161,12 +178,13 @@ function buildFrames() {
     .slice(0, MAX_FRAMES);
 
   for (const el of els) {
-    const kind: Kind = el.matches('.chip, .tag, .badge, .btn')
+    // 一整组标签只算一个框，不再给每个 tag / chip 单独挂光团
+    const kind: Kind = el.matches('.card-tags, .tags, .chips, .btn')
       ? 'small'
       : el.matches('.card, .art-card')
         ? 'card'
         : 'panel';
-    const frame: Frame = { el, kind, desired: kind === 'small' ? 1 : 2, orbs: [] };
+    const frame: Frame = { el, kind, desired: kind === 'card' ? 2 : 1, orbs: [] };
     frames.push(frame);
     frameMap.set(el, frame);
     fillOrbs(frame);
@@ -190,57 +208,57 @@ function pickTarget(origin: Frame): Frame | null {
   return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
 
+/** 落点也完全随机：目标框的任意一条边、任意位置 */
 function targetPoint(frame: Frame): Point | null {
-  if (frame.orbs.length && Math.random() < 0.7) {
-    const orb = frame.orbs[Math.floor(Math.random() * frame.orbs.length)];
-    return { ...orb.home };
-  }
   const rect = docRect(frame.el);
-  return rect ? pointAt(rect, randomEdge(), 0.2 + Math.random() * 0.6) : null;
+  return rect ? pointAt(rect, randomEdge(), 0.12 + Math.random() * 0.76) : null;
 }
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+/** 三次贝塞尔：两个随机控制点让每次飞行路径都不一样 */
 function bezier(f: Flight, t: number): Point {
   const u = 1 - t;
+  const a = u * u * u;
+  const b = 3 * u * u * t;
+  const c = 3 * u * t * t;
+  const d = t * t * t;
   return {
-    x: u * u * f.from.x + 2 * u * t * f.ctrl.x + t * t * f.to.x,
-    y: u * u * f.from.y + 2 * u * t * f.ctrl.y + t * t * f.to.y,
+    x: a * f.from.x + b * f.c1.x + c * f.c2.x + d * f.to.x,
+    y: a * f.from.y + b * f.c1.y + c * f.c2.y + d * f.to.y,
   };
 }
 
-/** 逐段描出光带：越靠近光团越亮越粗，尾端几乎透明 */
+/** 三层宽柔光叠加，配合 canvas 的整体模糊，只留下朦胧光雾，没有清晰亮线 */
 function drawTrail(f: Flight, head: number, alpha: number) {
   if (!ctx || alpha <= 0 || head <= 0) return;
-  const steps = 24;
+  const steps = 26;
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.shadowColor = 'rgba(110, 240, 160, 0.9)';
-  ctx.shadowBlur = 12;
+  ctx.shadowColor = 'rgba(190, 255, 110, 0.5)';
+  ctx.shadowBlur = 20;
   for (let i = 0; i < steps; i++) {
-    const a = head * (i / steps);
-    const b = head * ((i + 1) / steps);
+    const t0 = head * (i / steps);
+    const t1 = head * ((i + 1) / steps);
     const k = (i + 1) / steps;
-    const strength = Math.pow(k, 1.7);
-    const p0 = bezier(f, a);
-    const p1 = bezier(f, b);
+    const strength = Math.pow(k, 1.5);
+    const p0 = bezier(f, t0);
+    const p1 = bezier(f, t1);
 
-    // 外层柔光：宽而淡，形成「光带」的体积
-    ctx.strokeStyle = `rgba(92, 224, 144, ${(alpha * 0.16 * strength).toFixed(3)})`;
-    ctx.lineWidth = 6 + 13 * k;
-    ctx.beginPath();
-    ctx.moveTo(p0.x, p0.y);
-    ctx.lineTo(p1.x, p1.y);
-    ctx.stroke();
-
-    // 内层亮芯：靠近光团更亮更粗，尾端渐隐
-    ctx.strokeStyle = `rgba(188, 255, 212, ${(alpha * (0.05 + 0.85 * strength)).toFixed(3)})`;
-    ctx.lineWidth = 0.8 + 4 * k;
-    ctx.beginPath();
-    ctx.moveTo(p0.x, p0.y);
-    ctx.lineTo(p1.x, p1.y);
-    ctx.stroke();
+    const layers: Array<[string, number]> = [
+      [`rgba(92, 224, 144, ${(alpha * 0.1 * strength).toFixed(3)})`, 30 + 16 * k],
+      [`rgba(190, 245, 96, ${(alpha * 0.19 * strength).toFixed(3)})`, 15 + 10 * k],
+      [`rgba(246, 255, 196, ${(alpha * 0.22 * strength).toFixed(3)})`, 6 + 6 * k],
+    ];
+    for (const [color, width] of layers) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+    }
   }
   ctx.restore();
 }
@@ -300,10 +318,20 @@ function launch(frame: Frame, fast: boolean) {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
     const dist = Math.hypot(dx, dy) || 1;
-    const bend = (Math.random() < 0.5 ? -1 : 1) * Math.min(170, 45 + dist * 0.2);
-    const ctrl = {
-      x: (from.x + to.x) / 2 - (dy / dist) * bend,
-      y: (from.y + to.y) / 2 + (dx / dist) * bend,
+    const nx = -dy / dist;
+    const ny = dx / dist;
+    const jitter = () => (Math.random() - 0.5) * Math.min(90, dist * 0.2);
+    const bend1 =
+      (Math.random() < 0.5 ? -1 : 1) * Math.min(240, 60 + dist * (0.18 + Math.random() * 0.32));
+    const bend2 =
+      (Math.random() < 0.5 ? -1 : 1) * Math.min(200, 40 + dist * (0.12 + Math.random() * 0.28));
+    const c1 = {
+      x: from.x + dx * 0.3 + nx * bend1 + jitter(),
+      y: from.y + dy * 0.3 + ny * bend1 + jitter(),
+    };
+    const c2 = {
+      x: from.x + dx * 0.7 + nx * bend2 + jitter(),
+      y: from.y + dy * 0.7 + ny * bend2 + jitter(),
     };
 
     orb.flying = true;
@@ -312,7 +340,8 @@ function launch(frame: Frame, fast: boolean) {
       orb,
       from,
       to,
-      ctrl,
+      c1,
+      c2,
       startedAt: performance.now(),
       duration: fast ? 500 : 860,
       fadeMs: fast ? 520 : 900,
