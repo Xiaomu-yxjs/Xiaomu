@@ -52,6 +52,7 @@ const stats = [
               widths={[400, 800, 1200]}
               sizes="300px"
               loading="eager"
+              fetchpriority={i === 0 ? 'high' : 'low'}
             />
           </div>
         ))}

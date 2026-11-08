@@ -78,9 +78,33 @@ const dayLqip = 'data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAABQBACdASoYAA4A
       <slot />
     </main>
     <SiteFooter />
+
+    <!-- 站内跳转时的主题化加载层：只有预取超过 120ms 才会显示 -->
+    <div class="clover-loader" id="clover-loader" aria-hidden="true">
+      <div class="clover-loader-box">
+        <svg class="clover-loader-mark" viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
+          <defs>
+            <radialGradient id="cll" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="22">
+              <stop offset="0%" stop-color="#c2f9d2" />
+              <stop offset="52%" stop-color="#5ce090" />
+              <stop offset="100%" stop-color="#1f9658" />
+            </radialGradient>
+          </defs>
+          <g fill="url(#cll)" transform="translate(24 24)">
+            <path transform="rotate(0)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+            <path transform="rotate(90)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+            <path transform="rotate(180)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+            <path transform="rotate(270)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+          </g>
+        </svg>
+        <span class="clover-loader-text">正在准备内容…</span>
+      </div>
+    </div>
+
     <script>
       import '../scripts/theme.ts';
       import '../scripts/fireflies.ts';
+      import '../scripts/loading.ts';
     </script>
     <style>
       .skip {

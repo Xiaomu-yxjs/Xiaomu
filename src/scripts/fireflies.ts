@@ -148,8 +148,13 @@ function tick(now: number) {
   }
 }
 
+let scrolling = false;
+let scrollTimer = 0;
+
 function start() {
-  if (!themeActive || reduced || raf || document.hidden) return;
+  // 滚动期间不更新光团：漂移每秒只有几像素，停一下肉眼无感，
+  // 但能把主线程与合成层留给滚动本身，明显减少掉帧。
+  if (!themeActive || reduced || scrolling || raf || document.hidden) return;
   last = performance.now();
   raf = requestAnimationFrame(tick);
 }
@@ -183,6 +188,24 @@ document.addEventListener('visibilitychange', () => {
     start();
   }
 });
+
+window.addEventListener(
+  'scroll',
+  () => {
+    if (!scrolling) {
+      scrolling = true;
+      layer.classList.add('is-scrolling');
+      stop();
+    }
+    window.clearTimeout(scrollTimer);
+    scrollTimer = window.setTimeout(() => {
+      scrolling = false;
+      layer.classList.remove('is-scrolling');
+      start();
+    }, 180);
+  },
+  { passive: true },
+);
 
 window.addEventListener('resize', () => {
   window.clearTimeout(resizeTimer);

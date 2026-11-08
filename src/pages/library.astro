@@ -304,8 +304,9 @@ const badges = [
     margin-bottom: var(--sp-6);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    background: var(--surface);
-    backdrop-filter: blur(8px);
+    /* 用实色深绿玻璃替代 backdrop-filter：滚动时少一层实时模糊合成，
+       也不会在收起切换的那一帧留下半透明重影 */
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
     box-shadow: var(--glow);
   }
 
@@ -385,7 +386,9 @@ const badges = [
     background: var(--surface);
     font-size: 13px;
     color: var(--ink-2);
-    transition: all 0.16s var(--ease);
+    /* 明确列出属性，避免 transition: all 在收起/切主题时把 visibility 等也拖出残影 */
+    transition: border-color 0.16s var(--ease), color 0.16s var(--ease),
+      background-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
   }
 
   .chip:hover {
@@ -462,16 +465,26 @@ const badges = [
 
     /* 收起态：整块面板透明化，只显示顶部一条紧凑条。
        主体仍占位（visibility: hidden），卡片位置与滚动位置都不会跳动。 */
+    /* 收起是原子切换：主体、图标、细条全部在同一帧改变，
+       不做任何渐隐/渐显。之前细条有 0.22s 入场动画、chip 又是 transition: all，
+       滚动截图里会出现「细条已出现、搜索框和标签还没消失」的叠影。 */
     .filter.is-collapsed {
       background: transparent;
       border-color: transparent;
       box-shadow: none;
       backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       pointer-events: none;
+      transition: none;
     }
 
-    .filter.is-collapsed .filter-body {
+    .filter.is-collapsed .filter-body,
+    .filter.is-collapsed .filter-body * {
       visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: none;
+      animation: none;
     }
 
     .filter.is-collapsed .filter-peek {
@@ -486,8 +499,7 @@ const badges = [
       padding: 0 14px;
       border: 1px solid var(--line-strong);
       border-radius: var(--radius-s);
-      background: color-mix(in srgb, var(--bg) 80%, transparent);
-      backdrop-filter: blur(10px);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
       box-shadow: var(--glow);
       color: var(--ink-2);
       font: inherit;
@@ -495,7 +507,6 @@ const badges = [
       text-align: left;
       cursor: pointer;
       pointer-events: auto;
-      animation: peek-in 0.22s var(--ease) both;
     }
 
     .filter.is-collapsed .filter-peek:hover {
@@ -533,17 +544,6 @@ const badges = [
       font-size: 12px;
       color: var(--ink-3);
       white-space: nowrap;
-    }
-  }
-
-  @keyframes peek-in {
-    from {
-      opacity: 0;
-      transform: translateY(-6px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
     }
   }
 
