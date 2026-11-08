@@ -48,6 +48,18 @@ const isActive = (href: string) =>
       逛游戏库
       <span aria-hidden="true">→</span>
     </a>
+
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到日间模式" title="切换到日间模式">
+      <svg class="theme-ico theme-ico--sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2"></circle>
+        <path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"></path>
+      </svg>
+      <svg class="theme-ico theme-ico--moon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+        <path d="M20.4 14.8A8.6 8.6 0 0 1 9.2 3.6 8.6 8.6 0 1 0 20.4 14.8Z"></path>
+      </svg>
+      <span class="theme-label theme-label--day">日间</span>
+      <span class="theme-label theme-label--night">夜间</span>
+    </button>
   </div>
 </header>
 
@@ -154,6 +166,36 @@ const isActive = (href: string) =>
     border-color: var(--ink);
   }
 
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding-inline: 12px;
+    flex: none;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: color 0.18s var(--ease), background 0.18s var(--ease),
+      border-color 0.18s var(--ease), box-shadow 0.18s var(--ease);
+  }
+
+  .theme-toggle:hover {
+    color: var(--ink);
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(92, 224, 144, 0.28);
+  }
+
+  .theme-ico {
+    flex: none;
+  }
+
   @media (max-width: 767px) {
     .hdr-inner {
       height: 60px;
@@ -164,7 +206,15 @@ const isActive = (href: string) =>
       display: none;
     }
     .nav {
-      gap: var(--sp-4);
+      gap: var(--sp-3);
+    }
+    .theme-toggle {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+    }
+    .theme-label {
+      display: none;
     }
   }
 

@@ -24,6 +24,8 @@ interface Orb {
   halo: number;
 }
 
+// 日间模式不出现荧光团：初始状态直接读 <html data-theme>，与 head 内联脚本一致
+let themeActive = document.documentElement.dataset.theme !== 'day';
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const layer = document.createElement('div');
@@ -92,7 +94,7 @@ function createOrb(): Orb {
 }
 
 function sync() {
-  const want = desiredCount();
+  const want = themeActive ? desiredCount() : 0;
   while (orbs.length < want) orbs.push(createOrb());
   while (orbs.length > want) orbs.pop()?.el.remove();
 }
@@ -147,13 +149,30 @@ function tick(now: number) {
 }
 
 function start() {
-  if (reduced || raf || document.hidden) return;
+  if (!themeActive || reduced || raf || document.hidden) return;
   last = performance.now();
   raf = requestAnimationFrame(tick);
 }
 
+function stop() {
+  if (raf) cancelAnimationFrame(raf);
+  raf = 0;
+}
+
 sync();
 start();
+
+// 主题切换：日间清空光团并停掉动画，夜间重新铺满并续上漂移
+window.addEventListener('clover:theme', (e) => {
+  themeActive = (e as CustomEvent<{ theme: string }>).detail.theme !== 'day';
+  if (themeActive) {
+    sync();
+    start();
+  } else {
+    stop();
+    sync();
+  }
+});
 
 // 切到后台时停掉 rAF，回来再续上，避免累积一大步位移
 document.addEventListener('visibilitychange', () => {

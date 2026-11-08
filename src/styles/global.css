@@ -67,7 +67,7 @@ body {
      高清图未到达时自动透出占位层，背景不会「空白等待」。 */
   background-image:
     linear-gradient(rgba(5, 22, 14, 0.62), rgba(5, 22, 14, 0.62)),
-    var(--clover-bg, none),
+    var(--clover-bg-night, none),
     url('data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAAAQAwCdASogABIAPt1orVCopaQnKAgBEBuJZwDKABaoSgAA/vBqgUNF6JoHFxMsafDv8nvB5Sjvs/sIEBsrAAAA');
   background-size: cover;
   background-position: center;
@@ -79,6 +79,62 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* ---------- 日间主题：明亮草地背景 + 深色玻璃内容层 ----------
+   只换背景与表面色，文字仍是浅色，靠遮罩和文字阴影保持对比度；
+   这样深色卡片、绿底标签、发光描边在亮草地上依然清晰。 */
+html[data-theme='day'] {
+  --surface: rgba(6, 26, 14, 0.74);
+  --surface-2: rgba(6, 26, 14, 0.56);
+  --ink-2: #dcefe1;
+  --ink-3: #b9d8c3;
+  --line: rgba(150, 228, 180, 0.22);
+  --line-strong: rgba(150, 228, 180, 0.38);
+  --accent-soft: rgba(92, 224, 144, 0.22);
+}
+
+html[data-theme='day'] body {
+  background-image:
+    linear-gradient(rgba(6, 28, 14, 0.38), rgba(6, 28, 14, 0.38)),
+    var(--clover-bg-day, none),
+    var(--clover-lqip-day, none);
+  /* 亮草地上给浅色文字一圈暗影，小字也能看清 */
+  text-shadow: 0 1px 2px rgba(1, 18, 7, 0.95), 0 0 12px rgba(1, 18, 7, 0.8);
+}
+
+/* 绿底深字的控件不需要文字阴影，否则会发糊 */
+html[data-theme='day'] .badge,
+html[data-theme='day'] .btn,
+html[data-theme='day'] .theme-toggle {
+  text-shadow: none;
+}
+
+/* 首屏文字区在左侧压一层暗渐变，右侧仍透出明亮草地 */
+html[data-theme='day'] .hero {
+  background-image: linear-gradient(
+    90deg,
+    rgba(4, 24, 10, 0.48),
+    rgba(4, 24, 10, 0.26) 36%,
+    rgba(4, 24, 10, 0) 62%
+  );
+}
+
+html[data-theme='day'] .btn--ghost {
+  background: rgba(6, 26, 14, 0.52);
+}
+
+html[data-theme='day'] .btn--ghost:hover {
+  background: rgba(6, 26, 14, 0.7);
+}
+
+/* 按钮文案显示的是「点一下会切换到的模式」：
+   夜间显示太阳 + 日间，日间显示月亮 + 夜间 */
+html[data-theme='night'] .theme-ico--moon,
+html[data-theme='night'] .theme-label--night,
+html[data-theme='day'] .theme-ico--sun,
+html[data-theme='day'] .theme-label--day {
+  display: none;
 }
 
 img {
@@ -423,6 +479,11 @@ button {
   pointer-events: none;
   z-index: 90;
   overflow: hidden;
+}
+
+/* 荧光团只在夜间出现；用 display:none 兜底，即使脚本还没执行也不会闪一下 */
+html[data-theme='day'] .firefly-layer {
+  display: none;
 }
 
 .firefly {

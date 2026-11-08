@@ -16,6 +16,11 @@ const { title, description, ogImage = '/images/og-default.jpg', noindex = false 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
 const ogImageUrl = new URL(ogImage, Astro.site ?? 'https://example.com').href;
 const siteName = '苜蓿草 CLOVER';
+const nightBg = withBase('/images/site-bg.webp');
+const dayBg = withBase('/images/site-bg-day.webp');
+const fireflyImg = withBase('/images/firefly.webp');
+// 日间背景的 24×14 模糊占位图，切换主题的瞬间先由它垫底，不会空白
+const dayLqip = 'data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAABQBACdASoYAA4APvVkqk4qpaOiMAgBUB6JaDuEOCeADAOwArUGfDgdIUGgAP7f+HvpFHM+iRyDoeOS4KEpkjQSJYf91eRfq9WM5CHr+zm3EWPCup60nYoE/G9mMduJRBf+ydMt+717gnb0bqphKdljSeFYhhZWRYh7RHyxwNlxkNUYxEN2HoMR11zOFMC+NZ6c/ckzVW/29UNZOaZoIcoiymRa6h7S+qVsauqf3kAAAA==';
 ---
 
 <!doctype html>
@@ -28,14 +33,28 @@ const siteName = '苜蓿草 CLOVER';
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
-    {/* 背景图是首屏最大资源：提前到 HTML 解析阶段高优先级请求，不等 CSS 下载完 */}
-    <link
-      rel="preload"
-      as="image"
-      href={withBase('/images/site-bg.webp')}
-      type="image/webp"
-      fetchpriority="high"
-    />
+    {/* 主题在 HTML 解析阶段就落定，避免日间用户看到一闪而过的夜间背景 */}
+    <meta name="theme-color" content="#0a2417" />
+    <script is:inline data-night={nightBg} data-day={dayBg}>
+      (function () {
+        var s = document.currentScript;
+        var theme = 'night';
+        try {
+          theme = localStorage.getItem('clover-theme') === 'day' ? 'day' : 'night';
+        } catch (e) {}
+        document.documentElement.dataset.theme = theme;
+        // 首屏最大资源：按当前主题高优先级预载，不等 CSS 下载完
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.type = 'image/webp';
+        link.setAttribute('fetchpriority', 'high');
+        link.href = theme === 'day' ? s.dataset.day : s.dataset.night;
+        document.head.appendChild(link);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = theme === 'day' ? '#3f7d2a' : '#0a2417';
+      })();
+    </script>
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={siteName} />
@@ -46,10 +65,13 @@ const siteName = '苜蓿草 CLOVER';
     <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <meta name="theme-color" content="#0a2417" />
     <slot name="head" />
   </head>
-  <body style={`--clover-bg: url('${withBase('/images/site-bg.webp')}'); --firefly-img: url('${withBase('/images/firefly.webp')}')`}>
+  <body
+    data-bg-night={nightBg}
+    data-bg-day={dayBg}
+    style={`--clover-bg-night: url('${nightBg}'); --clover-bg-day: url('${dayBg}'); --clover-lqip-day: url('${dayLqip}'); --firefly-img: url('${fireflyImg}')`}
+  >
     <a class="skip" href="#main">跳到主内容</a>
     <SiteHeader />
     <main id="main">
@@ -57,6 +79,7 @@ const siteName = '苜蓿草 CLOVER';
     </main>
     <SiteFooter />
     <script>
+      import '../scripts/theme.ts';
       import '../scripts/fireflies.ts';
     </script>
     <style>
