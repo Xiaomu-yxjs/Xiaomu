@@ -72,6 +72,9 @@ const dayLqip = 'data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAABQBACdASoYAA4A
     data-bg-day={dayBg}
     style={`--clover-bg-night: url('${nightBg}'); --clover-bg-day: url('${dayBg}'); --clover-lqip-day: url('${dayLqip}'); --firefly-img: url('${fireflyImg}')`}
   >
+    <!-- 背景单独成层：白天/黑夜两张图共用同一个极缓慢的「微风」晃动 -->
+    <div class="clover-bg" aria-hidden="true"><div class="clover-bg-art"></div></div>
+
     <a class="skip" href="#main">跳到主内容</a>
     <SiteHeader />
     <main id="main">

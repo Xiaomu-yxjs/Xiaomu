@@ -83,6 +83,7 @@ src/
 ## 性能约定
 
 - **背景图**：夜间 `public/images/site-bg.webp`（1600×899，约 54KB），日间 `public/images/site-bg-day.webp`（1600×901，约 143KB）。`BaseLayout.astro` 的 head 内联脚本按当前主题动态插入 `<link rel="preload" as="image" fetchpriority="high">`，只预载会用到的那张，不等 CSS 下载；另一张在浏览器空闲时才预取，不占首屏带宽。`global.css` 的第三层背景分别内联了夜间 84 字节、日间 196 字节的模糊占位图，高清图未到达或刚切换主题时不会空白。`public/images/site-bg.jpg` 保留为夜间原始母版。
+- **背景晃动**：`BaseLayout.astro` 里背景单独成层（`.clover-bg` 固定视口 + `.clover-bg-art` 比视口大 4%），夜间 30s、日间 36s 的 `clover-sway` 关键帧只改 `transform`（位移约 1%、缩放 1.055→1.062、微旋 ±0.14deg），像草地被风轻轻推了一下。只动画 transform 且层已 `will-change`，由合成线程完成；同时去掉了原来的 `background-attachment: fixed`（滚动时每帧重绘整屏背景的主因），滚动实测平均帧间隔 16.7ms、0 掉帧。`prefers-reduced-motion` 下背景静止。
 - **图片加载**：首页只有 3 张 hero 叠层封面用 `loading="eager"`，第一张 `fetchpriority="high"`、其余 `low`；卡片封面/图标与画廊均按需加载；详情页首屏封面 `fetchpriority="high"`、画廊 `low`。首页三处封面共用同一组 `widths={[400, 800, 1200]}`，让同一张封面生成相同 URL、浏览器只下载一次。所有预取都排在首屏之后，不抢背景与封面的带宽。
 - **实测基线**（Fast 3G 1.6Mbps / 150ms RTT，冷缓存，1440×900）：首屏总传输 530KB → 164KB，`load` 事件 3025ms → 1150ms，背景图 2635ms → 980ms；连续滚动 115 帧中超过 32ms 的掉帧 42 → 5，平均帧间隔 23.6ms → 17.4ms。
 
