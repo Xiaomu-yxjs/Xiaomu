@@ -172,8 +172,12 @@ const badges = [
   if (params.get('badge')) state.badge = params.get('badge')!;
   if (qInput && state.q) qInput.value = state.q;
 
+  // 记录最近一次输入时间：只有「刚打过字」才暂缓收起。
+  // 不能因为焦点恰好停在输入框就永远不收起（这正是展开后再下滑失效的原因）。
+  let lastInputAt = 0;
   qInput?.addEventListener('input', () => {
     state.q = qInput.value;
+    lastInputAt = performance.now();
     apply(false);
   });
 
@@ -222,11 +226,14 @@ const badges = [
   function expand() {
     setCollapsed(false);
     expandY = window.scrollY;
+    // 展开会让面板高度变化，同步重置滚动锚点，避免把这次变化算成一次下滑
+    anchorY = expandY;
   }
 
   toggle.addEventListener('click', () => {
     expand();
-    qInput?.focus();
+    // 不自动聚焦搜索框：焦点留在细条按钮上，往下滑才能重新收起。
+    // 需要输入时用户自己点输入框即可。
   });
 
   let ticking = false;
@@ -247,10 +254,14 @@ const badges = [
       expand();
       return;
     }
-    // 正在输入时不打断
-    if (document.activeElement === qInput) return;
-    // 往下滚一小段就收起；展开后需再滚这么远才重新收起，避免来回打摆
-    if (!collapsed && dy > 0 && y - expandY > 80) setCollapsed(true);
+    // 只有刚输入过（1.2 秒内）才不打断；单纯焦点停留不该阻止再次收起
+    if (qInput && document.activeElement === qInput) {
+      if (performance.now() - lastInputAt < 1200) return;
+      qInput.blur();
+    }
+    // 往下滚就收起。这里只留 12px 缓冲：游戏库页面较短，展开后可滚动的
+    // 余量往往不到 80px，原来的大阈值会让「展开后再下滑」看起来完全失效。
+    if (!collapsed && dy > 0 && y - expandY > 12) setCollapsed(true);
   }
 
   window.addEventListener(

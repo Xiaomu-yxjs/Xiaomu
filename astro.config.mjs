@@ -7,7 +7,8 @@ export default defineConfig({
   base: '/Xiaomu/',
   output: 'static',
   build: { format: 'directory' },
-  integrations: [sitemap()],
+  // 个人主页带 noindex，是用户相关页面，不放进公开站点地图
+  integrations: [sitemap({ filter: (page) => !new URL(page).pathname.endsWith('/me/') })],
   image: {
     // 默认即 sharp，显式声明避免不同环境降级到 passthrough
     service: { entrypoint: 'astro/assets/services/sharp' },

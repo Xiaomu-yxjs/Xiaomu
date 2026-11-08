@@ -1,0 +1,266 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/base';
+---
+
+<BaseLayout
+  title="个人主页 | 苜蓿草"
+  description="苜蓿草的个人主页：登录后可收藏喜欢的游戏、记录看过的测评。账号功能即将开放。"
+  noindex
+>
+  <section class="wrap me">
+    <div class="me-head">
+      <p class="eyebrow">My clover</p>
+      <h1>个人主页</h1>
+      <p class="me-sub">属于你的一小块苜蓿园：收藏、评分与浏览记录，登录后都会收在这里。</p>
+    </div>
+
+    <div class="me-grid">
+      <article class="me-card me-card--login">
+        <div class="me-mark-wrap" aria-hidden="true">
+          <svg class="me-mark" viewBox="0 0 48 48" width="62" height="62">
+            <defs>
+              <radialGradient id="clm" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="22">
+                <stop offset="0%" stop-color="#c2f9d2" />
+                <stop offset="52%" stop-color="#5ce090" />
+                <stop offset="100%" stop-color="#1f9658" />
+              </radialGradient>
+            </defs>
+            <g fill="url(#clm)" transform="translate(24 24)">
+              <path transform="rotate(0)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+              <path transform="rotate(90)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+              <path transform="rotate(180)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+              <path transform="rotate(270)" d="M0 0 C -5 -6 -9 -11 -9 -15 C -9 -20 -4 -22 0 -18 C 4 -22 9 -20 9 -15 C 9 -11 5 -6 0 0 Z" />
+            </g>
+          </svg>
+        </div>
+
+        <p class="me-kicker">尚未登录</p>
+        <h2>欢迎来到苜蓿园</h2>
+        <p class="me-desc">登录后可以收藏喜欢的游戏、记录看过的测评，并在不同设备间同步。</p>
+
+        <div class="me-actions">
+          <button class="btn me-login" type="button" disabled aria-describedby="login-hint">
+            登录 / 注册
+            <span class="me-soon">即将开放</span>
+          </button>
+          <p class="me-hint" id="login-hint">账号功能正在准备中，现在可以先随便逛逛。</p>
+        </div>
+
+        <div class="me-links">
+          <a class="link" href={withBase('/library/')}>逛游戏库 <span aria-hidden="true">→</span></a>
+          <a class="link" href={withBase('/')}>回首页 <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+      <div class="me-side">
+        <article class="me-card">
+          <div class="me-card-head">
+            <h2>我的收藏</h2>
+            <span class="me-state">登录后可见</span>
+          </div>
+          <p class="me-card-sub">收藏的游戏会按你添加的顺序排在这里。</p>
+          <div class="me-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+        </article>
+
+        <article class="me-card">
+          <div class="me-card-head">
+            <h2>最近浏览</h2>
+            <span class="me-state">登录后可见</span>
+          </div>
+          <p class="me-card-sub">看过的测评会留一条记录，方便接着看。</p>
+          <div class="me-skeleton" aria-hidden="true"><span></span><span></span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .me {
+    padding-block: var(--sp-9);
+  }
+
+  .me-head {
+    max-width: 660px;
+    margin-bottom: var(--sp-7);
+  }
+
+  .me-head h1 {
+    margin-top: var(--sp-3);
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.2;
+  }
+
+  .me-sub {
+    margin-top: var(--sp-3);
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  .me-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--sp-6);
+    align-items: start;
+  }
+
+  .me-side {
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .me-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    /* 个人主页是状态 / 表单卡，比游戏卡片更实一点，亮草地上小字也清楚 */
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    box-shadow: var(--glow);
+    padding: var(--sp-7);
+  }
+
+  .me-card--login {
+    text-align: center;
+    padding: var(--sp-8) var(--sp-7);
+  }
+
+  .me-mark-wrap {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto var(--sp-5);
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: radial-gradient(circle at 50% 45%, rgba(92, 224, 144, 0.22), rgba(6, 30, 16, 0.55) 72%);
+    box-shadow: 0 0 30px rgba(92, 224, 144, 0.22), inset 0 0 22px rgba(92, 224, 144, 0.14);
+  }
+
+  .me-mark {
+    filter: drop-shadow(0 0 8px rgba(92, 224, 144, 0.8));
+  }
+
+  .me-kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  .me-card h2 {
+    margin-top: var(--sp-2);
+    font-size: 22px;
+  }
+
+  .me-desc {
+    max-width: 38ch;
+    margin: var(--sp-3) auto var(--sp-6);
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+
+  .me-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+
+  .me-login {
+    min-width: 210px;
+  }
+
+  .me-login:disabled,
+  .me-login:disabled:hover {
+    transform: none;
+    background: var(--accent);
+    box-shadow: 0 0 16px rgba(92, 224, 144, 0.32);
+    opacity: 0.78;
+    cursor: not-allowed;
+  }
+
+  .me-soon {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding-inline: 9px;
+    border-radius: 999px;
+    background: rgba(6, 41, 26, 0.16);
+    color: #06291a;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .me-hint {
+    color: var(--ink-3);
+    font-size: 12px;
+  }
+
+  .me-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+
+  .me-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+
+  .me-card-head h2 {
+    margin-top: 0;
+    font-size: 18px;
+  }
+
+  .me-state {
+    flex: none;
+    padding: 3px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-3);
+    font-size: 11px;
+  }
+
+  .me-card-sub {
+    margin-top: var(--sp-2);
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+
+  .me-skeleton {
+    display: grid;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+
+  .me-skeleton span {
+    display: block;
+    height: 44px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-s);
+    background: var(--surface-2);
+  }
+
+  @media (max-width: 860px) {
+    .me-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .me {
+      padding-block: var(--sp-7);
+    }
+    .me-card,
+    .me-card--login {
+      padding: var(--sp-6) var(--sp-5);
+    }
+    .me-links {
+      gap: var(--sp-5);
+    }
+  }
+</style>

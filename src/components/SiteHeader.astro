@@ -14,7 +14,8 @@ const isActive = (href: string) =>
 
 <header class="hdr">
   <div class="wrap hdr-inner">
-    <a class="brand" href={withBase('/')} aria-label="苜蓿草 首页">
+    <!-- 四叶草标识 = 个人主页入口；首页已由导航里的「首页」承担 -->
+    <a class="brand" href={withBase('/me/')} aria-label="苜蓿草 个人主页" title="个人主页">
       <svg class="brand-mark" viewBox="0 0 48 48" width="26" height="26" aria-hidden="true">
         <defs>
           <radialGradient id="clh" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="22">
@@ -93,6 +94,11 @@ const isActive = (href: string) =>
     height: 26px;
     flex: none;
     filter: drop-shadow(0 0 5px rgba(92, 224, 144, 0.85));
+    transition: filter 0.18s var(--ease);
+  }
+
+  .brand:hover .brand-mark {
+    filter: drop-shadow(0 0 11px rgba(92, 224, 144, 0.95));
   }
 
   .brand-text {
