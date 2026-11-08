@@ -34,7 +34,7 @@ src/
 ├─ layouts/BaseLayout.astro # title/description/canonical/OG 全在这里
 └─ pages/
    ├─ index.astro          # 首页：Hero + 精品推荐 + 最近测评
-   ├─ library.astro        # 游戏库：纯前端筛选（类别/标记/关键词 + URL 同步）
+   ├─ library.astro        # 游戏库：纯前端筛选（类别/标记/关键词 + URL 同步 + 下滑收起筛选条）
    ├─ games/[slug].astro   # 详情页：双栏 + 截图画廊 + JSON-LD VideoGame
    └─ 404.astro
 ```
@@ -74,6 +74,7 @@ src/
 - **图片**：全部走 `astro:assets`，构建时转 WebP 并按 `widths` 出多档 srcset。
 - **无 JS 也能用**：除筛选外，全部静态可读。
 - 游戏库筛选项由当前数据动态生成，不会出现点了必定零结果的类别 / 标记。
+- **筛选条下滑收起**（仅 ≥960px，即 sticky 生效时）：桌面端往下滚动超过约 80px，大筛选面板收成一条 42px 的「搜索 / 筛选」细条，避免半透明面板一直盖住卡片；细条上同步显示当前条件摘要与结果数，点击细条即展开并聚焦搜索框，滚回页面顶部也会自动展开。收起态用 `visibility: hidden` 保留占位高度 + `inert` 屏蔽焦点，卡片位置与滚动位置都不跳动；收起后不会因上滑自动弹回。移动端不启用，避免留下大片空白。
 - **环境荧光团**：`src/scripts/fireflies.ts` 全局注入。光团是「白芯 → 黄绿 → 荧光绿」的朦胧光球，像呼吸一样渐明渐暗；不附着任何卡片 / 标签框，而是固定在视口内、以每秒约 2.5~7px 极缓慢地随机漂移，靠近屏幕边缘会缓缓转身。每个光团带一圈大范围极淡柔光，微微照亮周围。没有点击飞行动画、也不绘制任何轨迹（避免断续光带），点击卡片链接不再延迟跳转。`prefers-reduced-motion` 下静止；切到后台暂停动画。
 - **光团性能**：光团不是实时 `radial-gradient`，而是 `public/images/firefly.webp` 的预渲染位图（约 4KB，另有 `firefly.png` 无损母版），浏览器只需贴图合成；位移更新节流到约 30fps；数量按视口面积限制在 8~14 个。原先 21 个渐变 + `mix-blend-mode: screen` 每帧要与整页重新混合，是滚动掉帧的主因。
 

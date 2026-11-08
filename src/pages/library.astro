@@ -19,47 +19,68 @@ const badges = [
     <div class="wrap">
       <p class="eyebrow">Library</p>
       <h1 class="lib-title">游戏库</h1>
-      <p class="lib-sub">共 {games.length} 款。筛选器在前端跑，不刷新页面。</p>
+      <p class="lib-sub">共 {games.length} 款。</p>
     </div>
   </section>
 
   <section class="wrap lib-body">
-    <div class="filter" role="search">
-      <div class="filter-search">
-        <svg class="ico" viewBox="0 0 20 20" aria-hidden="true" width="16" height="16">
+    <div class="filter" id="filter" role="search">
+      <!-- 收起态：只留一条紧凑的可展开条 -->
+      <button
+        class="filter-peek"
+        type="button"
+        id="filter-toggle"
+        aria-expanded="true"
+        aria-controls="filter-body"
+      >
+        <svg class="peek-ico" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
           <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
           <path d="M13.5 13.5 17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
         </svg>
-        <input
-          id="q"
-          type="search"
-          placeholder="搜游戏名、类别或标签…"
-          autocomplete="off"
-          aria-label="搜索游戏"
-        />
-      </div>
+        <span class="peek-summary" id="peek-summary">搜索 / 筛选</span>
+        <span class="peek-count" id="peek-count">共 {games.length} 款</span>
+        <svg class="peek-caret" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M3.5 6 8 10.5 12.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
 
-      <div class="filter-row" role="group" aria-label="按类别筛选">
-        <span class="filter-label">类别</span>
-        <div class="chips">
-          {categories.map((c) => (
-            <button class="chip" type="button" data-filter="category" data-value={c}>{c}</button>
-          ))}
+      <div class="filter-body" id="filter-body">
+        <div class="filter-search">
+          <svg class="ico" viewBox="0 0 20 20" aria-hidden="true" width="16" height="16">
+            <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+            <path d="M13.5 13.5 17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+          </svg>
+          <input
+            id="q"
+            type="search"
+            placeholder="搜游戏名、类别或标签…"
+            autocomplete="off"
+            aria-label="搜索游戏"
+          />
         </div>
-      </div>
 
-      <div class="filter-row" role="group" aria-label="按标记筛选">
-        <span class="filter-label">标记</span>
-        <div class="chips">
-          {badges.map((b) => (
-            <button class="chip" type="button" data-filter="badge" data-value={b.value}>{b.label}</button>
-          ))}
+        <div class="filter-row" role="group" aria-label="按类别筛选">
+          <span class="filter-label">类别</span>
+          <div class="chips">
+            {categories.map((c) => (
+              <button class="chip" type="button" data-filter="category" data-value={c}>{c}</button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div class="filter-foot">
-        <p class="count" id="count" aria-live="polite">共 {games.length} 款</p>
-        <button class="reset" type="button" id="reset">重置筛选</button>
+        <div class="filter-row" role="group" aria-label="按标记筛选">
+          <span class="filter-label">标记</span>
+          <div class="chips">
+            {badges.map((b) => (
+              <button class="chip" type="button" data-filter="badge" data-value={b.value}>{b.label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="filter-foot">
+          <p class="count" id="count" aria-live="polite">共 {games.length} 款</p>
+          <button class="reset" type="button" id="reset">重置筛选</button>
+        </div>
       </div>
     </div>
 
@@ -84,6 +105,11 @@ const badges = [
   const countEl = document.getElementById('count');
   const emptyEl = document.getElementById('empty');
   const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+  const filter = document.getElementById('filter') as HTMLElement;
+  const filterBody = document.getElementById('filter-body') as HTMLElement;
+  const toggle = document.getElementById('filter-toggle') as HTMLButtonElement;
+  const peekSummary = document.getElementById('peek-summary');
+  const peekCount = document.getElementById('peek-count');
 
   const state: State = { q: '', category: '全部', badge: 'all' };
 
@@ -94,6 +120,10 @@ const badges = [
     if (state.badge !== 'all') params.set('badge', state.badge);
     const qs = params.toString();
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+  }
+
+  function countText(visible: number) {
+    return visible === cards.length ? `共 ${cards.length} 款` : `${visible} / ${cards.length} 款`;
   }
 
   function apply(pushUrl = true) {
@@ -109,13 +139,27 @@ const badges = [
       if (ok) visible++;
     }
 
-    if (countEl) countEl.textContent = visible === cards.length ? `共 ${cards.length} 款` : `${visible} / ${cards.length} 款`;
+    const text = countText(visible);
+    if (countEl) countEl.textContent = text;
+    if (peekCount) peekCount.textContent = text;
     if (emptyEl) emptyEl.hidden = visible !== 0;
     if (grid) grid.hidden = visible === 0;
 
     for (const chip of chips) {
       const key = chip.dataset.filter as 'category' | 'badge';
       chip.classList.toggle('active', state[key] === chip.dataset.value);
+    }
+
+    // 收起条上保留当前条件摘要，展开前也能知道筛的是什么
+    if (peekSummary) {
+      const bits: string[] = [];
+      if (state.q.trim()) bits.push(`“${state.q.trim()}”`);
+      for (const chip of chips) {
+        if (!chip.classList.contains('active')) continue;
+        const v = chip.dataset.value;
+        if (v && v !== 'all' && v !== '全部') bits.push(chip.textContent?.trim() ?? '');
+      }
+      peekSummary.textContent = bits.length ? bits.join(' · ') : '搜索 / 筛选';
     }
 
     if (pushUrl) syncUrl();
@@ -155,6 +199,78 @@ const badges = [
   document.getElementById('empty-reset')?.addEventListener('click', reset);
 
   apply(false);
+
+  /* ---------- 下滑收起 ----------
+     仅桌面端（sticky 生效时）启用；收起态用 visibility 保留占位高度，
+     所以卡片位置完全不动、也不会出现滚动跳动。
+     收起后不会因上滑自动弹回（避免大面板反复遮住卡片），
+     只有点细条、或滚回页面顶部才会重新展开。 */
+  const desktop = window.matchMedia('(min-width: 960px)');
+  let collapsed = false;
+  let anchorY = window.scrollY;
+  let expandY = window.scrollY;
+
+  function setCollapsed(next: boolean) {
+    if (!desktop.matches) next = false;
+    if (next === collapsed) return;
+    collapsed = next;
+    filter.classList.toggle('is-collapsed', collapsed);
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+    filterBody.inert = collapsed;
+  }
+
+  function expand() {
+    setCollapsed(false);
+    expandY = window.scrollY;
+  }
+
+  toggle.addEventListener('click', () => {
+    expand();
+    qInput?.focus();
+  });
+
+  let ticking = false;
+  function onScroll() {
+    const y = window.scrollY;
+    const dy = y - anchorY;
+    if (!desktop.matches) {
+      setCollapsed(false);
+      anchorY = y;
+      return;
+    }
+    // 累积微小位移，避免慢速滚动时方向判断抖动
+    if (Math.abs(dy) < 4) return;
+    anchorY = y;
+
+    // 回到页面顶部时恢复展开
+    if (y < 140) {
+      expand();
+      return;
+    }
+    // 正在输入时不打断
+    if (document.activeElement === qInput) return;
+    // 往下滚一小段就收起；展开后需再滚这么远才重新收起，避免来回打摆
+    if (!collapsed && dy > 0 && y - expandY > 80) setCollapsed(true);
+  }
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        onScroll();
+      });
+    },
+    { passive: true }
+  );
+
+  desktop.addEventListener('change', () => {
+    setCollapsed(false);
+    anchorY = window.scrollY;
+    expandY = anchorY;
+  });
 </script>
 
 <style>
@@ -181,9 +297,9 @@ const badges = [
 
   /* ---------- 筛选条 ---------- */
   .filter {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
     padding: var(--sp-4) var(--sp-5);
     margin-bottom: var(--sp-6);
     border: 1px solid var(--line);
@@ -191,6 +307,17 @@ const badges = [
     background: var(--surface);
     backdrop-filter: blur(8px);
     box-shadow: var(--glow);
+  }
+
+  .filter-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  /* 收起条默认隐藏，只在桌面端收起态出现 */
+  .filter-peek {
+    display: none;
   }
 
   .filter-search {
@@ -331,6 +458,92 @@ const badges = [
       top: 84px;
       z-index: 20;
       box-shadow: 0 1px 0 var(--line);
+    }
+
+    /* 收起态：整块面板透明化，只显示顶部一条紧凑条。
+       主体仍占位（visibility: hidden），卡片位置与滚动位置都不会跳动。 */
+    .filter.is-collapsed {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      pointer-events: none;
+    }
+
+    .filter.is-collapsed .filter-body {
+      visibility: hidden;
+    }
+
+    .filter.is-collapsed .filter-peek {
+      position: absolute;
+      top: var(--sp-4);
+      left: var(--sp-5);
+      right: var(--sp-5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-s);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--glow);
+      color: var(--ink-2);
+      font: inherit;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      pointer-events: auto;
+      animation: peek-in 0.22s var(--ease) both;
+    }
+
+    .filter.is-collapsed .filter-peek:hover {
+      border-color: var(--accent);
+      color: var(--ink);
+    }
+
+    .filter.is-collapsed .filter-peek:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .peek-ico {
+      flex: none;
+      color: var(--accent);
+    }
+
+    .peek-caret {
+      flex: none;
+      color: var(--ink-3);
+    }
+
+    .peek-summary {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 600;
+    }
+
+    .peek-count {
+      flex: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-3);
+      white-space: nowrap;
+    }
+  }
+
+  @keyframes peek-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
