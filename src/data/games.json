@@ -1,5 +1,47 @@
 [
   {
+    "id": "g010",
+    "slug": "jizhan",
+    "title": "机战：钢铁巨舰",
+    "category": "角色扮演",
+    "badge": "hot",
+    "cover": "jizhan",
+    "icon": "jizhan",
+    "description": "三九互娱联合运营的硬核科幻机甲 MMORPG。机甲由玩家自由组装：动力核心、武器挂载、装甲类型与推进系统均可自定义，从轻型剑客到重型战锤；搭配技能树连招、星舰对决与舰队星际要塞，主打万人同屏的星域 GVG 对抗与星际剧情探索。支持安卓 / iOS / PC 模拟器三端互通。",
+    "platform": ["Android", "iOS", "PC"],
+    "tags": ["机甲", "科幻", "自由组装", "GVG"],
+    "externalUrl": "https://jz.3975.com/download/sao",
+    "screenshots": ["jizhan-1", "jizhan-2", "jizhan-3", "jizhan-4"]
+  },
+  {
+    "id": "g011",
+    "slug": "juezhan",
+    "title": "决战破晓",
+    "category": "动作冒险",
+    "badge": "new",
+    "cover": "juezhan",
+    "icon": "juezhan",
+    "description": "三九互娱发行的经典科幻风 MMO 手游，延续「决战」系列的端游质感。故事发生在太阳异变后的兰肯纳斯废土，剑师、拳师、枪械师、魔法师四大职业各具战斗风格，更换装备会实时改变角色外观；核心劫掠、掠夺之地、军团要塞百人攻城与轻量养成构成主要玩法，支持安卓 / iOS 双端互通与 PC 模拟器。",
+    "platform": ["Android", "iOS", "PC"],
+    "tags": ["科幻", "MMORPG", "四大职业", "军团要塞"],
+    "externalUrl": "https://jzpx.3975.com/download/sao",
+    "screenshots": ["juezhan-1", "juezhan-2", "juezhan-3", "juezhan-4"]
+  },
+  {
+    "id": "g012",
+    "slug": "moxiang",
+    "title": "墨香情",
+    "category": "角色扮演",
+    "badge": "hot",
+    "cover": "moxiang",
+    "icon": "moxiang",
+    "description": "三九互娱联合运营的东方幻想武侠 MMORPG，主打原汁原味的怀旧江湖。职业自选，刀、枪、弓、暗器、琴师等全流派自由养成；正邪之战、BOSS 争夺、副本挑战与缤纷时装构成主要内容，成长路线清晰、以经典复古玩法为主，支持安卓 / iOS / PC 模拟器三端互通。",
+    "platform": ["Android", "iOS", "PC"],
+    "tags": ["武侠", "MMORPG", "怀旧", "自由PK"],
+    "externalUrl": "https://mxq.3975.com/download/sao",
+    "screenshots": ["moxiang-1", "moxiang-2", "moxiang-3", "moxiang-4"]
+  },
+  {
     "id": "g008",
     "slug": "wulin",
     "title": "武林外传：十年之约",
