@@ -29,8 +29,8 @@ const stats = [
           每款游戏内容三分钟看完：核心玩法、氪金性价比、合适度。
         </p>
         <div class="hero-actions">
-          <a class="btn" href={withBase('/library/')}>浏览全部游戏 <span aria-hidden="true">→</span></a>
-          <a class="btn btn--ghost" href="#picks">看编辑精选</a>
+          <a class="btn" href={withBase('/library/')}>全部游戏</a>
+          <a class="btn btn--ghost" href="#picks">精选</a>
         </div>
 
         <dl class="stats">
@@ -67,9 +67,9 @@ const stats = [
         <div>
           <p class="eyebrow">Editor's picks</p>
           <h2 class="section-title">精品推荐</h2>
-          <p class="section-sub">编辑部这周挑出来的几款，最多三款，宁缺毋滥。</p>
+          <p class="section-sub">每周精心挑选的三款游戏，建议游玩。</p>
         </div>
-        <a class="link" href={withBase('/library/?badge=pick')}>全部精选 <span aria-hidden="true">→</span></a>
+        <a class="link" href={withBase('/library/?badge=pick')}>全部精选</a>
       </div>
 
       <div class="grid">
@@ -86,7 +86,7 @@ const stats = [
           <h2 class="section-title">最近测评</h2>
           <p class="section-sub">按类别、标签或关键词筛选，快速找到想玩的那款。</p>
         </div>
-        <a class="link" href={withBase('/library/')}>进入游戏库 <span aria-hidden="true">→</span></a>
+        <a class="link" href={withBase('/library/')}>进入游戏库</a>
       </div>
 
       <div class="grid">
@@ -217,6 +217,11 @@ const stats = [
     flex-wrap: wrap;
   }
 
+  /* 文案缩短后外框贴合内容，不留空旷的大胶囊 */
+  .hero-actions .btn {
+    padding-inline: 20px;
+  }
+
   .stats {
     display: flex;
     gap: var(--sp-8);
@@ -265,8 +270,9 @@ const stats = [
       font-size: 19px;
     }
     .hero-actions .btn {
-      flex: 1;
-      min-width: 150px;
+      flex: 0 0 auto;
+      min-width: 0;
+      padding-inline: 18px;
     }
   }
 </style>

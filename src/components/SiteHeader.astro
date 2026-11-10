@@ -49,7 +49,6 @@ const onGuides = current.startsWith('/guides');
     <a class:list={['hdr-cta', { active: onGuides }]} href={withBase('/guides/')}>
       <span class="cta-full">逛攻略</span>
       <span class="cta-short">攻略</span>
-      <span class="cta-arrow" aria-hidden="true">→</span>
     </a>
 
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到日间模式" title="切换到日间模式">
@@ -223,8 +222,7 @@ const onGuides = current.startsWith('/guides');
       padding-inline: 10px;
       font-size: 12px;
     }
-    .cta-full,
-    .cta-arrow {
+    .cta-full {
       display: none;
     }
     .cta-short {
