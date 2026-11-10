@@ -1,0 +1,650 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/base';
+import games from '../data/games.json';
+
+const gameOptions = games.map((g) => ({ slug: g.slug, title: g.title }));
+const kinds = ['入门', '职业', '装备', '玩法', '其他'];
+---
+
+<BaseLayout
+  title="攻略 | 苜蓿草"
+  description="苜蓿草攻略广场：写下一句能帮到下一个玩家的入门心得、职业选择与玩法技巧。"
+>
+  <section class="wrap guides">
+    <div class="guides-head">
+      <p class="eyebrow">Guides</p>
+      <h1>攻略</h1>
+      <p class="guides-sub">把踩过的坑和好用的打法写下来，留给下一个进游戏的人。</p>
+      <p class="guides-note">
+        <strong>本地演示</strong> · 投稿保存在当前浏览器，只有这台设备看得到；换设备或清除浏览器数据后不会同步。
+      </p>
+    </div>
+
+    <div class="guides-grid">
+      <section class="g-card g-form-card" aria-labelledby="post-title">
+        <div class="g-card-head">
+          <h2 id="post-title">发一篇攻略</h2>
+          <span class="g-state">自由投稿</span>
+        </div>
+
+        <form id="guide-form" novalidate>
+          <div class="g-row">
+            <label class="g-field">
+              <span>关联游戏</span>
+              <select name="game" id="guide-game">
+                {gameOptions.map((g) => <option value={g.slug}>{g.title}</option>)}
+                <option value="other">其他 / 综合</option>
+              </select>
+            </label>
+            <label class="g-field">
+              <span>攻略类型</span>
+              <select name="kind" id="guide-kind">
+                {kinds.map((k) => <option value={k}>{k}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <label class="g-field">
+            <span>标题</span>
+            <input
+              name="title"
+              id="guide-title"
+              type="text"
+              maxlength="40"
+              required
+              placeholder="一句话说清这篇讲什么"
+            />
+          </label>
+
+          <label class="g-field">
+            <span>正文 <em id="guide-counter">0 / 600</em></span>
+            <textarea
+              name="body"
+              id="guide-body"
+              rows="7"
+              maxlength="600"
+              required
+              placeholder="把你的思路写清楚：先做什么、为什么、有什么要注意的。"
+            ></textarea>
+          </label>
+
+          <label class="g-field">
+            <span>署名（可选）</span>
+            <input name="author" id="guide-author" type="text" maxlength="16" placeholder="匿名玩家" />
+          </label>
+
+          <p class="g-error" id="guide-error" role="alert" hidden></p>
+
+          <div class="g-actions">
+            <button class="btn" type="submit">发布攻略 <span aria-hidden="true">→</span></button>
+            <p class="g-hint">发布后会立刻出现在下面的列表里。</p>
+          </div>
+        </form>
+
+        <p class="g-ok" id="guide-ok" role="status" aria-live="polite" hidden></p>
+      </section>
+
+      <section class="g-list-wrap" aria-labelledby="list-title">
+        <div class="g-list-head">
+          <div>
+            <p class="eyebrow">Community</p>
+            <h2 class="section-title" id="list-title">攻略广场</h2>
+            <p class="section-sub">共 <strong id="guide-total">0</strong> 篇 · 最新投稿排在最前</p>
+          </div>
+          <a class="link" href={withBase('/library/')}>找游戏 <span aria-hidden="true">→</span></a>
+        </div>
+        <div id="guide-list" class="g-list"></div>
+      </section>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  type Guide = {
+    id: string;
+    game: string;
+    kind: string;
+    title: string;
+    body: string;
+    author: string;
+    date: string;
+    mine: boolean;
+  };
+
+  const KEY = 'clover-guides-v1';
+  const LIMIT = 50;
+  const form = document.getElementById('guide-form') as HTMLFormElement;
+  const list = document.getElementById('guide-list') as HTMLDivElement;
+  const total = document.getElementById('guide-total') as HTMLElement;
+  const errorBox = document.getElementById('guide-error') as HTMLParagraphElement;
+  const okBox = document.getElementById('guide-ok') as HTMLParagraphElement;
+  const counter = document.getElementById('guide-counter') as HTMLElement;
+  const titleInput = document.getElementById('guide-title') as HTMLInputElement;
+  const bodyInput = document.getElementById('guide-body') as HTMLTextAreaElement;
+  const authorInput = document.getElementById('guide-author') as HTMLInputElement;
+  const gameSelect = document.getElementById('guide-game') as HTMLSelectElement;
+  const kindSelect = document.getElementById('guide-kind') as HTMLSelectElement;
+
+  // 栏目示例：只用于展示版式，内容来自各游戏官网已公开的玩法要素，不含未公开数值
+  const samples: Guide[] = [
+    {
+      id: 'sample-1',
+      game: '机战：钢铁巨舰',
+      kind: '入门',
+      title: '先把机甲配好，再推主线',
+      body: '开局别急着堆战力，先把动力核心、武器挂载、装甲类型和推进系统各选一套顺手的组合：轻型偏机动、重型偏承伤。\n主线卡关时，优先回头看装甲类型是不是被当前敌人克制，再考虑换武器，通常比硬堆等级省时间。',
+      author: '编辑示例',
+      date: '2026-11-01',
+      mine: false,
+    },
+    {
+      id: 'sample-2',
+      game: '决战破晓',
+      kind: '职业',
+      title: '四大职业先试手感再定主力',
+      body: '剑师、拳师、枪械师、魔法师的手感差别很大，建议先把四个职业都试到能打出基础连招，再决定主练哪一个。\n更换装备会实时改变角色外观，喜欢搭配的玩家可以顺手把外观方案一起记下来。',
+      author: '编辑示例',
+      date: '2026-10-28',
+      mine: false,
+    },
+    {
+      id: 'sample-3',
+      game: '墨香情',
+      kind: '玩法',
+      title: '新手先跟主线，再找固定队',
+      body: '东方幻想武侠的门派技能要先靠主线熟悉，别一进游戏就扎进各种日常。\n正邪之战这类组队玩法，先找一两个固定队友，配合和沟通比临时匹配稳得多。',
+      author: '编辑示例',
+      date: '2026-10-24',
+      mine: false,
+    },
+  ];
+
+  const GAME_NAMES: Record<string, string> = {};
+  gameSelect.querySelectorAll('option').forEach((o) => {
+    GAME_NAMES[(o as HTMLOptionElement).value] = (o as HTMLOptionElement).textContent || '其他 / 综合';
+  });
+
+  function str(v: unknown, max: number): string {
+    return typeof v === 'string' ? v.slice(0, max) : '';
+  }
+
+  function read(): Guide[] {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((x) => x && typeof x === 'object')
+        .slice(0, LIMIT)
+        .map((x) => ({
+          id: str(x.id, 40),
+          game: str(x.game, 40),
+          kind: str(x.kind, 12) || '其他',
+          title: str(x.title, 40),
+          body: str(x.body, 600),
+          author: str(x.author, 16) || '匿名玩家',
+          date: str(x.date, 24),
+          mine: true,
+        }))
+        .filter((x) => x.title.trim() && x.body.trim());
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function save(items: Guide[]): boolean {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(items.slice(0, LIMIT)));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function showError(msg: string, field?: HTMLElement) {
+    errorBox.textContent = msg;
+    errorBox.hidden = false;
+    field?.focus();
+  }
+
+  function clearError() {
+    errorBox.hidden = true;
+    errorBox.textContent = '';
+  }
+
+  function flash(msg: string) {
+    okBox.textContent = msg;
+    okBox.hidden = false;
+    window.setTimeout(() => {
+      okBox.hidden = true;
+    }, 3200);
+  }
+
+  function el(tag: string, cls?: string, text?: string): HTMLElement {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    // 用户投稿一律走 textContent，不拼 HTML，避免注入
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function card(g: Guide, fresh: boolean): HTMLElement {
+    const article = el('article', fresh ? 'g-item is-fresh' : 'g-item');
+    const top = el('div', 'g-item-top');
+    top.append(
+      el('span', 'g-game', g.game),
+      el('span', 'g-kind', g.kind),
+      el('span', g.mine ? 'g-flag g-flag--mine' : 'g-flag', g.mine ? '我的投稿' : '示例')
+    );
+    if (g.mine) {
+      const del = el('button', 'g-del', '删除') as HTMLButtonElement;
+      del.type = 'button';
+      del.setAttribute('aria-label', `删除攻略：${g.title}`);
+      del.addEventListener('click', () => {
+        const rest = read().filter((x) => x.id !== g.id);
+        if (save(rest)) {
+          render();
+          flash('已删除这篇攻略。');
+        } else {
+          showError('删除失败：浏览器存储不可用。');
+        }
+      });
+      top.append(del);
+    }
+    article.append(top, el('h3', 'g-item-title', g.title), el('p', 'g-item-body', g.body));
+    const meta = el('div', 'g-item-meta');
+    const date = g.mine
+      ? new Date(g.date).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+      : g.date.replace(/-/g, '/');
+    meta.append(el('span', '', g.author), el('time', '', date));
+    if (g.mine) meta.querySelector('time')?.setAttribute('datetime', g.date);
+    article.append(meta);
+    return article;
+  }
+
+  let freshId = '';
+  function render() {
+    const mine = read().sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    const all = [...mine, ...samples];
+    list.replaceChildren(...all.map((g) => card(g, g.id === freshId)));
+    total.textContent = String(all.length);
+  }
+
+  bodyInput.addEventListener('input', () => {
+    counter.textContent = `${bodyInput.value.length} / 600`;
+    if (bodyInput.value.trim().length >= 10) clearError();
+  });
+  titleInput.addEventListener('input', () => {
+    if (titleInput.value.trim().length >= 2) clearError();
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearError();
+    const title = titleInput.value.trim();
+    const body = bodyInput.value.trim();
+    if (title.length < 2) return showError('标题至少写 2 个字。', titleInput);
+    if (body.length < 10) return showError('正文至少写 10 个字，别只留一句呀。', bodyInput);
+
+    const item: Guide = {
+      id: `g-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      game: GAME_NAMES[gameSelect.value] || '其他 / 综合',
+      kind: kindSelect.value || '其他',
+      title: title.slice(0, 40),
+      body: body.slice(0, 600),
+      author: authorInput.value.trim().slice(0, 16) || '匿名玩家',
+      date: new Date().toISOString(),
+      mine: true,
+    };
+    const next = [item, ...read()].slice(0, LIMIT);
+    if (!save(next)) return showError('发布失败：浏览器存储不可用，请检查隐私模式或存储空间。');
+
+    freshId = item.id;
+    form.reset();
+    counter.textContent = '0 / 600';
+    render();
+    flash('已发布，攻略已经排到列表最前面。');
+    window.setTimeout(() => {
+      freshId = '';
+      list.querySelector('.is-fresh')?.classList.remove('is-fresh');
+    }, 2600);
+  });
+
+  render();
+</script>
+
+<style>
+  .guides {
+    padding-block: var(--sp-9);
+  }
+
+  /* 亮草地上给栏头垫一层从左往右淡出的暗绿，和首页 hero 的处理一致 */
+  .guides-head {
+    max-width: 720px;
+    margin-bottom: var(--sp-7);
+    margin-left: calc(-1 * var(--sp-5));
+    padding: var(--sp-5);
+    border-radius: var(--radius);
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--bg) 80%, transparent),
+      color-mix(in srgb, var(--bg) 42%, transparent) 62%,
+      transparent
+    );
+  }
+
+  .guides-head h1 {
+    margin-top: var(--sp-3);
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.2;
+  }
+
+  .guides-sub {
+    margin-top: var(--sp-3);
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  .guides-note {
+    margin-top: var(--sp-4);
+    padding: 10px 14px;
+    border: 1px solid var(--line-strong);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-s);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .guides-note strong {
+    color: var(--accent);
+  }
+
+  .guides-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--sp-6);
+    align-items: start;
+  }
+
+  .g-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    /* 表单卡比游戏卡更实，亮草地上小字也清楚 */
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    box-shadow: var(--glow);
+    padding: var(--sp-6);
+  }
+
+  .g-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-5);
+  }
+
+  .g-card-head h2 {
+    font-size: 20px;
+  }
+
+  .g-state {
+    padding: 3px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink-3);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .g-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-4);
+  }
+
+  .g-field {
+    display: block;
+    margin-bottom: var(--sp-4);
+  }
+
+  .g-field > span {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin-bottom: 7px;
+    color: var(--ink-2);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .g-field > span em {
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .g-field select,
+  .g-field input,
+  .g-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-s);
+    background: rgba(2, 18, 9, 0.42);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+    transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease);
+  }
+
+  .g-field textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  .g-field select option {
+    background: #0d2b1a;
+    color: #e9f3ec;
+  }
+
+  .g-field input::placeholder,
+  .g-field textarea::placeholder {
+    color: var(--ink-3);
+    opacity: 0.85;
+  }
+
+  .g-field select:focus-visible,
+  .g-field input:focus-visible,
+  .g-field textarea:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .g-error,
+  .g-ok {
+    margin: 0 0 var(--sp-4);
+    padding: 9px 12px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+  }
+
+  .g-error {
+    border: 1px solid rgba(255, 138, 76, 0.55);
+    background: var(--warm-soft);
+    color: #ffd6bd;
+  }
+
+  .g-ok {
+    margin-top: var(--sp-4);
+    margin-bottom: 0;
+    border: 1px solid var(--line-strong);
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .g-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+  }
+
+  .g-hint {
+    color: var(--ink-3);
+    font-size: 12px;
+  }
+
+  .g-list-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--sp-5);
+    padding: var(--sp-4) var(--sp-5);
+    border-radius: var(--radius);
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--bg) 78%, transparent),
+      color-mix(in srgb, var(--bg) 30%, transparent)
+    );
+  }
+
+  :global(html[data-theme='day']) .guides-head :global(.eyebrow),
+  :global(html[data-theme='day']) .g-list-head :global(.eyebrow) {
+    color: #f2fff6;
+    text-shadow: 0 1px 3px rgba(1, 18, 7, 0.95), 0 0 10px rgba(1, 18, 7, 0.8);
+  }
+
+  .g-list-head .section-sub {
+    margin-top: var(--sp-2);
+  }
+
+  .g-list {
+    display: grid;
+    gap: var(--sp-4);
+  }
+
+  /* 攻略卡片由脚本动态创建，不带 Astro 的 scoped 属性；
+     用 :global() 包住动态节点，静态父级 .g-list 仍限定作用范围。 */
+  .g-list :global(.g-item) {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    box-shadow: var(--glow);
+    padding: var(--sp-5);
+    transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+
+  .g-list :global(.g-item.is-fresh) {
+    border-color: var(--accent);
+    box-shadow: var(--glow-strong);
+  }
+
+  .g-list :global(.g-item-top) {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--sp-3);
+  }
+
+  .g-list :global(.g-game) {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .g-list :global(.g-kind),
+  .g-list :global(.g-flag) {
+    padding: 2px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-2);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .g-list :global(.g-flag--mine) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .g-list :global(.g-del) {
+    margin-left: auto;
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-3);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
+  }
+
+  .g-list :global(.g-del:hover) {
+    color: #ffd6bd;
+    border-color: rgba(255, 138, 76, 0.6);
+  }
+
+  .g-list :global(.g-item-title) {
+    font-size: 17px;
+    line-height: 1.4;
+    margin-bottom: var(--sp-2);
+  }
+
+  .g-list :global(.g-item-body) {
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .g-list :global(.g-item-meta) {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+    font-size: 12px;
+  }
+
+  @media (max-width: 960px) {
+    .guides-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 767px) {
+    /* 窄屏 wrap 的内边距更小，栏头负边距跟着收，避免横向溢出 */
+    .guides-head {
+      margin-left: calc(-1 * var(--sp-4));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .guides {
+      padding-block: var(--sp-7);
+    }
+    .g-card {
+      padding: var(--sp-5);
+    }
+    .g-row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>

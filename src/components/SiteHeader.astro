@@ -10,6 +10,7 @@ const nav = [
 ];
 const isActive = (href: string) =>
   href === '/' ? current === '/' : href.startsWith('/library') ? current.startsWith('/library') : false;
+const onGuides = current.startsWith('/guides');
 ---
 
 <header class="hdr">
@@ -45,9 +46,10 @@ const isActive = (href: string) =>
       ))}
     </nav>
 
-    <a class="hdr-cta" href={withBase('/library/')}>
-      逛游戏库
-      <span aria-hidden="true">→</span>
+    <a class:list={['hdr-cta', { active: onGuides }]} href={withBase('/guides/')}>
+      <span class="cta-full">逛攻略</span>
+      <span class="cta-short">攻略</span>
+      <span class="cta-arrow" aria-hidden="true">→</span>
     </a>
 
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到日间模式" title="切换到日间模式">
@@ -167,9 +169,14 @@ const isActive = (href: string) =>
     flex: none;
   }
 
-  .hdr-cta:hover {
+  .hdr-cta:hover,
+  .hdr-cta.active {
     background: var(--surface);
     border-color: var(--ink);
+  }
+
+  .cta-short {
+    display: none;
   }
 
   .theme-toggle {
@@ -207,9 +214,21 @@ const isActive = (href: string) =>
       height: 60px;
       gap: var(--sp-4);
     }
-    .brand-text em,
-    .hdr-cta {
+    .brand-text em {
       display: none;
+    }
+    /* 手机上收成「攻略」短胶囊：攻略页在窄屏也有入口 */
+    .hdr-cta {
+      height: 32px;
+      padding-inline: 10px;
+      font-size: 12px;
+    }
+    .cta-full,
+    .cta-arrow {
+      display: none;
+    }
+    .cta-short {
+      display: inline;
     }
     .nav {
       gap: var(--sp-3);
