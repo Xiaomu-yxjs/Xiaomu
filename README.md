@@ -64,8 +64,8 @@ src/
 | `platform` | string[] | ✅ | 如 `["Android","iOS","PC"]` |
 | `tags` | string[] | ✅ | 玩法标签，卡片取前 3 |
 | `rating` | number | ✅ | 评分，统一在 8.0 以上；缺填或低于 8.0 时 `lib/games.ts` 按 slug 随机生成 8.1~9.8 |
-| `externalUrl` | string | ✅ | 官方下载外链，`rel="nofollow noopener"` |
-| `androidUrl` / `iosUrl` | string | 可选 | 详情页「安卓下载 / iOS 下载」两个按钮各自的地址；留空时回退到 `externalUrl` |
+| `externalUrl` | string | ✅ | 官方下载页地址，仅作资料备用，不直接渲染 |
+| `downloads` | `{ label, url }[]` | ✅ | 详情页下载按钮列表，按顺序渲染、数量不限（如龙之谷 / 墨香情各有 3 个包）；空数组时整块下载区连同说明文字都不显示（决战破晓）。链接统一 `target="_blank" rel="noopener noreferrer nofollow"` |
 | `screenshots` | string[] | ✅ | 空数组时详情页整段画廊自动隐藏 |
 
 > 不展示在玩人数、价格与「免费」字样，也不再提供微信小程序入口；`players` / `price` / `originalPrice` 字段已从 schema 移除。

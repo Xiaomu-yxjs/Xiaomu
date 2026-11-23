@@ -2,6 +2,12 @@ import gamesData from '../data/games.json';
 
 export type Badge = 'pick' | 'new' | 'hot';
 
+/** 详情页的一个下载按钮：label 是按钮文字，url 是推广包地址 */
+export interface DownloadLink {
+  label: string;
+  url: string;
+}
+
 export interface Game {
   id: string;
   slug: string;
@@ -14,10 +20,9 @@ export interface Game {
   platform: string[];
   tags: string[];
   rating: number;
+  /** 官方下载页，资料备用；按钮统一读 downloads */
   externalUrl: string;
-  /** 平台专属下载地址；留空时回退到 externalUrl（官方下载页） */
-  androidUrl?: string;
-  iosUrl?: string;
+  downloads: DownloadLink[];
   screenshots: string[];
 }
 

@@ -22,10 +22,6 @@ const related = games.filter((g) => g.slug !== game.slug && g.category === game.
 const fallbackRelated = games.filter((g) => g.slug !== game.slug).slice(0, 3);
 const recommend = related.length ? related : fallbackRelated;
 
-// 平台专属地址还没提供前，两个按钮都先落到官方下载页，保证链接可用
-const androidUrl = game.androidUrl || game.externalUrl;
-const iosUrl = game.iosUrl || game.externalUrl;
-
 const desc = `${game.title}（${game.category}）：${game.description.slice(0, 62)}…`;
 const coverUrl = new URL(cover.src, Astro.site ?? 'https://example.com').href;
 
@@ -118,27 +114,24 @@ const jsonLd = {
           {game.tags.map((tag) => <span class="tag">{tag}</span>)}
         </div>
 
-        <div class="dl-actions">
-          <a
-            class="btn dl-btn"
-            href={androidUrl}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            aria-label={`${game.title} 安卓版下载`}
-          >
-            安卓下载
-          </a>
-          <a
-            class="btn dl-btn"
-            href={iosUrl}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            aria-label={`${game.title} iOS 版下载`}
-          >
-            iOS 下载
-          </a>
-        </div>
-        <p class="tiny">外部链接，请认准官方渠道下载。</p>
+        {game.downloads.length > 0 && (
+          <>
+            <div class="dl-actions">
+              {game.downloads.map((dl) => (
+                <a
+                  class="btn dl-btn"
+                  href={dl.url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  aria-label={`${game.title} ${dl.label}`}
+                >
+                  {dl.label}
+                </a>
+              ))}
+            </div>
+            <p class="tiny">外部链接，请认准官方渠道下载。</p>
+          </>
+        )}
       </div>
     </header>
 
@@ -326,16 +319,18 @@ const jsonLd = {
     margin-bottom: var(--sp-5);
   }
 
-  /* 单一下载按钮拆成安卓 / iOS 两个并排胶囊 */
+  /* 按 downloads 渲染任意数量按钮，窄屏自动换行 */
   .dl-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--sp-3);
   }
 
   .dl-btn {
-    flex: 1;
+    flex: 1 1 150px;
     min-width: 0;
     padding-inline: var(--sp-3);
+    white-space: nowrap;
   }
 
   .tiny {

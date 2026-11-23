@@ -11,8 +11,10 @@
     "platform": ["Android", "iOS", "PC"],
     "tags": ["机甲", "科幻", "自由组装", "GVG"],
     "externalUrl": "https://jz.3975.com/download/sao",
-    "androidUrl": "",
-    "iosUrl": "",
+    "downloads": [
+      { "label": "安卓下载", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7609&promote_id=2039" },
+      { "label": "iOS 下载", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7164&promote_id=2039" }
+    ],
     "screenshots": ["jizhan-1", "jizhan-2", "jizhan-3", "jizhan-4"]
   },
   {
@@ -27,8 +29,7 @@
     "platform": ["Android", "iOS", "PC"],
     "tags": ["科幻", "MMORPG", "四大职业", "军团要塞"],
     "externalUrl": "https://jzpx.3975.com/download/sao",
-    "androidUrl": "",
-    "iosUrl": "",
+    "downloads": [],
     "screenshots": ["juezhan-1", "juezhan-2", "juezhan-3", "juezhan-4"]
   },
   {
@@ -43,8 +44,11 @@
     "platform": ["Android", "iOS", "PC"],
     "tags": ["武侠", "MMORPG", "怀旧", "自由PK"],
     "externalUrl": "https://mxq.3975.com/download/sao",
-    "androidUrl": "",
-    "iosUrl": "",
+    "downloads": [
+      { "label": "安卓下载", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7713&promote_id=2039" },
+      { "label": "iOS 下载 1", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7032&promote_id=2039" },
+      { "label": "iOS 下载 2", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7666&promote_id=2039" }
+    ],
     "screenshots": ["moxiang-1", "moxiang-2", "moxiang-3", "moxiang-4"]
   },
   {
@@ -60,8 +64,10 @@
     "tags": ["武侠", "MMORPG", "怀旧", "三端互通"],
     "rating": 9.1,
     "externalUrl": "https://wlwz.3975.com/download/sao",
-    "androidUrl": "",
-    "iosUrl": "",
+    "downloads": [
+      { "label": "安卓下载", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7669&promote_id=2039" },
+      { "label": "iOS 下载", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7672&promote_id=2039" }
+    ],
     "screenshots": ["wulin-1", "wulin-2", "wulin-3", "wulin-4"]
   },
   {
@@ -77,8 +83,11 @@
     "tags": ["3D动作", "MMORPG", "龙之谷", "三端互通"],
     "rating": 8.8,
     "externalUrl": "https://dn.3975.com/download/sao",
-    "androidUrl": "",
-    "iosUrl": "",
+    "downloads": [
+      { "label": "安卓 · 首发专区", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7485&promote_id=2039" },
+      { "label": "iOS · 首发专区", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7484&promote_id=2039" },
+      { "label": "iOS · 普雷利镇", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7259&promote_id=2039" }
+    ],
     "screenshots": ["dragon-nest-1", "dragon-nest-2", "dragon-nest-3", "dragon-nest-4"]
   },
   {
@@ -94,8 +103,10 @@
     "tags": ["回合制", "三国", "MMORPG", "怀旧"],
     "rating": 9.0,
     "externalUrl": "https://ty.3975.com/download/sao",
-    "androidUrl": "",
-    "iosUrl": "",
+    "downloads": [
+      { "label": "安卓下载", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7736&promote_id=2039" },
+      { "label": "iOS 下载", "url": "https://sdkn-ldy.zhangyu39.com/?app_id=7711&promote_id=2039" }
+    ],
     "screenshots": ["taoyuan-1", "taoyuan-2", "taoyuan-3", "taoyuan-4"]
   }
 ]
