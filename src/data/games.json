@@ -11,6 +11,8 @@
     "platform": ["Android", "iOS", "PC"],
     "tags": ["机甲", "科幻", "自由组装", "GVG"],
     "externalUrl": "https://jz.3975.com/download/sao",
+    "androidUrl": "",
+    "iosUrl": "",
     "screenshots": ["jizhan-1", "jizhan-2", "jizhan-3", "jizhan-4"]
   },
   {
@@ -25,6 +27,8 @@
     "platform": ["Android", "iOS", "PC"],
     "tags": ["科幻", "MMORPG", "四大职业", "军团要塞"],
     "externalUrl": "https://jzpx.3975.com/download/sao",
+    "androidUrl": "",
+    "iosUrl": "",
     "screenshots": ["juezhan-1", "juezhan-2", "juezhan-3", "juezhan-4"]
   },
   {
@@ -39,6 +43,8 @@
     "platform": ["Android", "iOS", "PC"],
     "tags": ["武侠", "MMORPG", "怀旧", "自由PK"],
     "externalUrl": "https://mxq.3975.com/download/sao",
+    "androidUrl": "",
+    "iosUrl": "",
     "screenshots": ["moxiang-1", "moxiang-2", "moxiang-3", "moxiang-4"]
   },
   {
@@ -54,6 +60,8 @@
     "tags": ["武侠", "MMORPG", "怀旧", "三端互通"],
     "rating": 9.1,
     "externalUrl": "https://wlwz.3975.com/download/sao",
+    "androidUrl": "",
+    "iosUrl": "",
     "screenshots": ["wulin-1", "wulin-2", "wulin-3", "wulin-4"]
   },
   {
@@ -69,6 +77,8 @@
     "tags": ["3D动作", "MMORPG", "龙之谷", "三端互通"],
     "rating": 8.8,
     "externalUrl": "https://dn.3975.com/download/sao",
+    "androidUrl": "",
+    "iosUrl": "",
     "screenshots": ["dragon-nest-1", "dragon-nest-2", "dragon-nest-3", "dragon-nest-4"]
   },
   {
@@ -84,6 +94,8 @@
     "tags": ["回合制", "三国", "MMORPG", "怀旧"],
     "rating": 9.0,
     "externalUrl": "https://ty.3975.com/download/sao",
+    "androidUrl": "",
+    "iosUrl": "",
     "screenshots": ["taoyuan-1", "taoyuan-2", "taoyuan-3", "taoyuan-4"]
   }
 ]

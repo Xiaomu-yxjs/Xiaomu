@@ -22,6 +22,10 @@ const related = games.filter((g) => g.slug !== game.slug && g.category === game.
 const fallbackRelated = games.filter((g) => g.slug !== game.slug).slice(0, 3);
 const recommend = related.length ? related : fallbackRelated;
 
+// 平台专属地址还没提供前，两个按钮都先落到官方下载页，保证链接可用
+const androidUrl = game.androidUrl || game.externalUrl;
+const iosUrl = game.iosUrl || game.externalUrl;
+
 const desc = `${game.title}（${game.category}）：${game.description.slice(0, 62)}…`;
 const coverUrl = new URL(cover.src, Astro.site ?? 'https://example.com').href;
 
@@ -114,14 +118,26 @@ const jsonLd = {
           {game.tags.map((tag) => <span class="tag">{tag}</span>)}
         </div>
 
-        <a
-          class="btn btn--block"
-          href={game.externalUrl}
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-        >
-          前往下载页 <span aria-hidden="true">↗</span>
-        </a>
+        <div class="dl-actions">
+          <a
+            class="btn dl-btn"
+            href={androidUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            aria-label={`${game.title} 安卓版下载`}
+          >
+            安卓下载
+          </a>
+          <a
+            class="btn dl-btn"
+            href={iosUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            aria-label={`${game.title} iOS 版下载`}
+          >
+            iOS 下载
+          </a>
+        </div>
         <p class="tiny">外部链接，请认准官方渠道下载。</p>
       </div>
     </header>
@@ -308,6 +324,18 @@ const jsonLd = {
     gap: 6px;
     flex-wrap: wrap;
     margin-bottom: var(--sp-5);
+  }
+
+  /* 单一下载按钮拆成安卓 / iOS 两个并排胶囊 */
+  .dl-actions {
+    display: flex;
+    gap: var(--sp-3);
+  }
+
+  .dl-btn {
+    flex: 1;
+    min-width: 0;
+    padding-inline: var(--sp-3);
   }
 
   .tiny {

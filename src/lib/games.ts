@@ -15,6 +15,9 @@ export interface Game {
   tags: string[];
   rating: number;
   externalUrl: string;
+  /** 平台专属下载地址；留空时回退到 externalUrl（官方下载页） */
+  androidUrl?: string;
+  iosUrl?: string;
   screenshots: string[];
 }
 

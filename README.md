@@ -65,6 +65,7 @@ src/
 | `tags` | string[] | ✅ | 玩法标签，卡片取前 3 |
 | `rating` | number | ✅ | 评分，统一在 8.0 以上；缺填或低于 8.0 时 `lib/games.ts` 按 slug 随机生成 8.1~9.8 |
 | `externalUrl` | string | ✅ | 官方下载外链，`rel="nofollow noopener"` |
+| `androidUrl` / `iosUrl` | string | 可选 | 详情页「安卓下载 / iOS 下载」两个按钮各自的地址；留空时回退到 `externalUrl` |
 | `screenshots` | string[] | ✅ | 空数组时详情页整段画廊自动隐藏 |
 
 > 不展示在玩人数、价格与「免费」字样，也不再提供微信小程序入口；`players` / `price` / `originalPrice` 字段已从 schema 移除。
