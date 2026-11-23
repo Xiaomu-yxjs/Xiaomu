@@ -15,7 +15,7 @@ interface Props {
 const { title, description, ogImage = '/images/og-default.jpg', noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
 const ogImageUrl = new URL(ogImage, Astro.site ?? 'https://example.com').href;
-const siteName = '小木-游戏测评站';
+const siteName = '小苜-游戏测评站';
 const nightBg = withBase('/images/site-bg.webp');
 const dayBg = withBase('/images/site-bg-day.webp');
 const fireflyImg = withBase('/images/firefly.webp');
