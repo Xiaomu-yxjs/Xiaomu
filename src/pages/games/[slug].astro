@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GameCard from '../../components/GameCard.astro';
 import { BADGE_LABEL, games, ratingText, type Game } from '../../lib/games';
@@ -25,6 +25,15 @@ const recommend = related.length ? related : fallbackRelated;
 const desc = `${game.title}（${game.category}）：${game.description.slice(0, 62)}…`;
 const coverUrl = new URL(cover.src, Astro.site ?? 'https://example.com').href;
 
+// 详情页 LCP 主视觉在 <head> 预载，参数与下方 <Image> 保持一致以复用请求
+const heroLcp = await getImage({
+  src: cover,
+  widths: [600, 900, 1200],
+  sizes: '(max-width: 899px) 100vw, 560px',
+  format: 'webp',
+  quality: 68,
+});
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'VideoGame',
@@ -47,6 +56,15 @@ const jsonLd = {
 
 <BaseLayout title={`${game.title} 测评 · ${game.category} | 小苜-游戏测评站`} description={desc} ogImage={cover.src}>
   <script type="application/ld+json" slot="head" is:inline set:html={JSON.stringify(jsonLd)} />
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    type="image/webp"
+    imagesrcset={heroLcp.srcSet.attribute}
+    imagesizes="(max-width: 899px) 100vw, 560px"
+    fetchpriority="high"
+  />
 
   <div class="wrap">
     <nav class="crumb" aria-label="面包屑">
@@ -64,6 +82,7 @@ const jsonLd = {
           alt={`${game.title} 主视觉`}
           widths={[600, 900, 1200]}
           sizes="(max-width: 899px) 100vw, 560px"
+          quality={68}
           loading="eager"
           fetchpriority="high"
         />
@@ -74,6 +93,7 @@ const jsonLd = {
             alt={`${game.title} 图标`}
             widths={[160, 240]}
             sizes="104px"
+            quality={68}
             loading="eager"
             decoding="async"
           />
@@ -141,15 +161,17 @@ const jsonLd = {
           <h2 id="shots-title">截图画廊</h2>
           <p class="sec-note">{shots.length} 张 · 左右滑动查看</p>
         </div>
+        <!-- sizes 按实测渲染宽度写（桌面 3 列约 376px），避免浏览器误选大一档 -->
         <div class="shots">
           {shots.map((shot, i) => (
             <Image
               src={shot}
               alt={`${game.title} 游戏画面 ${i + 1}`}
-              widths={[420, 840, 1280]}
-              sizes="(max-width: 639px) 82vw, 33vw"
-              loading="eager"
-              fetchpriority="low"
+              widths={[320, 420, 640, 840]}
+              sizes="(max-width: 639px) 82vw, (max-width: 1023px) 32vw, 380px"
+              quality={68}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'low' : 'auto'}
               decoding="async"
             />
           ))}

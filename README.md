@@ -75,7 +75,7 @@ src/
 - **卡片用线不用阴影**：`1px solid var(--line)`，hover 时 `translateY(-3px)` + 封面 `scale(1.04)`，无 box-shadow。
 - **按钮文案 / 无箭头**：全站 CTA 统一去掉「→」装饰，文案收短为「全部游戏 / 精选 / 逛攻略 / 全部精选 / 进入游戏库 / 去游戏库 / 回首页」；「精品推荐」副文案改为「每周精心挑选的三款游戏，建议游玩。」。首页 hero 两个胶囊 `padding-inline` 收到 20px（移动端 18px），并取消移动端 `flex:1 + min-width:150px`，让外框贴合缩短后的文字，不留空旷大胶囊。
 - **断点**：360 / 768 / 1280；网格 3 列 → 2 列 → 1 列。
-- **图片**：全部走 `astro:assets`，构建时转 WebP 并按 `widths` 出多档 srcset。
+- **图片**：全部走 `astro:assets`，构建时转 WebP（统一 `quality={68}`，原先走 sharp 默认 q80）并按 `widths` 出多档 srcset。`sizes` 必须写实测渲染宽度，不能用偏大的 `vw` 估值——否则浏览器会误选大一档图片白下几十 KB。
 - **无 JS 也能用**：除筛选与攻略投稿外，全部静态可读。
 - **攻略广场（本地演示投稿）**：右上角 CTA 原为「逛游戏库」，与导航里的「游戏库」重复，现改为「逛攻略」指向 `/guides/`；手机上收成「攻略」短胶囊，页脚「浏览」列也补了入口。页面左侧是发布表单（关联游戏、类型、标题、正文、可选署名），右侧是列表：3 条标「示例」的栏目示范 + 用户投稿（按时间倒序置顶，可删除）。投稿存 `localStorage['clover-guides-v1']`（最多 50 条），刷新保留，**只在本机可见**；字段读取时逐项做类型与长度校验，渲染一律 `textContent`，不拼 HTML，避免注入。表单自带标题 ≥2 字、正文 ≥10 字的校验与字数计数；存储不可用（隐私模式）时给明确报错。列表卡片由 JS 动态创建，**不带 Astro scoped 属性**，所以相关 CSS 必须写成 `.g-list :global(.g-item)` 形式，否则边框底色全部失效；日间栏头另垫一层从左往右淡出的暗绿渐变，保证亮草地上的小字可读。
 - **日间 / 夜间主题**：右上角的切换按钮默认夜间（暗绿发光背景 + 荧光团），点一下切到日间（明亮四叶草草地背景、无荧光团）。选择存在 `localStorage['clover-theme']`，`<head>` 内联脚本在解析阶段就写好 `<html data-theme>`，刷新不回退也不会闪；`src/scripts/theme.ts` 广播 `clover:theme` 让荧光团脚本启停。日间保留深色玻璃卡片与浅色文字，靠文字暗影和首屏左侧暗渐变保证亮草地上的可读性。
@@ -84,14 +84,15 @@ src/
 - **个人主页 / 登录占位**：左上角四叶草标识指向 `/me/`（导航里的「首页」仍回首页，避免重复入口），页面 `noindex` 且由 `astro.config.mjs` 的 sitemap `filter` 排除。按用户选择「先只做页面」：`登录 / 注册` 按钮 `disabled` 并标「即将开放」，另有「我的收藏 / 最近浏览」占位骨架；**未接入后端，也没有做本地演示登录**，账号功能待定。
 - **环境荧光团**：`src/scripts/fireflies.ts` 全局注入。光团是「白芯 → 黄绿 → 荧光绿」的朦胧光球，像呼吸一样渐明渐暗；不附着任何卡片 / 标签框，而是固定在视口内、以每秒约 2.5~7px 极缓慢地随机漂移，靠近屏幕边缘会缓缓转身。每个光团带一圈大范围极淡柔光，微微照亮周围。没有点击飞行动画、也不绘制任何轨迹（避免断续光带），点击卡片链接不再延迟跳转。`prefers-reduced-motion` 下静止；切到后台暂停动画；**切到日间模式时整层隐藏、光团节点清空并停掉 rAF**，只有夜间才会出现。
 - **光团性能**：光团不是实时 `radial-gradient`，而是 `public/images/firefly.webp` 的预渲染位图（约 4KB，另有 `firefly.png` 无损母版），浏览器只需贴图合成；位移更新节流到约 30fps；数量按视口面积限制在 8~14 个。原先 21 个渐变 + `mix-blend-mode: screen` 每帧要与整页重新混合，是滚动掉帧的主因。滚动期间连漂移 rAF 与呼吸动画一起暂停，滚动停止 180ms 后续上。
-- **加载体验**（`src/scripts/loading.ts`）：未加载完的图片先显示会呼吸的绿色四叶草占位，`load` / `error` 后淡入真实图片；点站内链接时后台预取目标页 HTML 并解码首屏前 6 张图，超过 120ms 才盖一层旋转四叶草加载层，取完或 2.2s 超时再跳转，避免「点进去一片空白等图」。鼠标悬停 / 键盘聚焦 / 页面 load 后空闲时还会预取主要站内页 HTML（最多 4 个），移动端没有 hover 也能受益。外链、锚点、下载、新窗口一律不拦截。
+- **加载体验**（`src/scripts/loading.ts`）：未加载完的图片先显示会呼吸的绿色四叶草占位，`load` / `error` 后淡入真实图片；点站内链接时后台预取目标页 HTML 并解码首屏前 2 张图（**必须带目标页的 `srcset` / `sizes` 让浏览器自己选档位**；以前直接取 `img.src` 是最大档 fallback 图，既浪费带宽又命中不了缓存），超过 120ms 才盖一层旋转四叶草加载层，取完或 2.2s 超时再跳转，避免「点进去一片空白等图」。鼠标悬停 / 键盘聚焦 / 页面 load 后空闲时还会预取主要站内页 HTML（最多 4 个），移动端没有 hover 也能受益。外链、锚点、下载、新窗口一律不拦截。
 
 ## 性能约定
 
-- **背景图**：夜间 `public/images/site-bg.webp`（1600×899，约 54KB），日间 `public/images/site-bg-day.webp`（1600×901，约 143KB）。`BaseLayout.astro` 的 head 内联脚本按当前主题动态插入 `<link rel="preload" as="image" fetchpriority="high">`，只预载会用到的那张，不等 CSS 下载；另一张在浏览器空闲时才预取，不占首屏带宽。`global.css` 的第三层背景分别内联了夜间 84 字节、日间 196 字节的模糊占位图，高清图未到达或刚切换主题时不会空白。`public/images/site-bg.jpg` 保留为夜间原始母版。
+- **背景图**：夜间 `public/images/site-bg.webp`（1440×809，约 34KB），日间 `public/images/site-bg-day.webp`（1440×811，约 96KB）；两张都由原始 1600px 母版单次编码到 WebP q62（背景是虚化草地，肉眼无差，合计从 197KB 降到 130KB）。`BaseLayout.astro` 的 head 内联脚本按当前主题动态插入 `<link rel="preload" as="image" fetchpriority="high">`，只预载会用到的那张，不等 CSS 下载。**另一张绝不参与首屏**：原先 `requestIdleCallback(timeout 4000)` 会让日夜两张图在首屏一起下载（白下 34~96KB），现改为主题按钮 `pointerenter` / `pointerdown` / `focus` 时立即备图，另在 `load` + 15s 后静默兜底。`global.css` 的第三层背景分别内联了夜间 84 字节、日间 196 字节的模糊占位图，高清图未到达或刚切换主题时不会空白。`public/images/site-bg.jpg` 保留为夜间原始母版。
 - **背景晃动**：`BaseLayout.astro` 里背景单独成层（`.clover-bg` 固定视口 + `.clover-bg-art` 比视口大 4%），夜间 30s、日间 36s 的 `clover-sway` 关键帧只改 `transform`（位移约 1%、缩放 1.055→1.062、微旋 ±0.14deg），像草地被风轻轻推了一下。只动画 transform 且层已 `will-change`，由合成线程完成；同时去掉了原来的 `background-attachment: fixed`（滚动时每帧重绘整屏背景的主因），滚动实测平均帧间隔 16.7ms、0 掉帧。`prefers-reduced-motion` 下背景静止。
-- **图片加载**：首页只有 3 张 hero 叠层封面用 `loading="eager"`，第一张 `fetchpriority="high"`、其余 `low`；卡片封面/图标与画廊均按需加载；详情页首屏封面 `fetchpriority="high"`、画廊 `low`。首页三处封面共用同一组 `widths={[400, 800, 1200]}`，让同一张封面生成相同 URL、浏览器只下载一次。所有预取都排在首屏之后，不抢背景与封面的带宽。
+- **图片加载**：首页只有 3 张 hero 叠层封面用 `loading="eager"`，第一张 `fetchpriority="high"`、其余 `low`；卡片封面/图标按需加载；详情页首屏封面 `fetchpriority="high"`，画廊只有第 1 张 `eager`，其余 `lazy`。首页与详情页的 LCP 主视觉另在 `<head>` 加 `<link rel=preload imagesrcset=... imagesizes=... type="image/webp" fetchpriority="high">`，**`getImage()` 参数必须与对应 `<Image>` 完全一致**，否则会重复下载；构建后核对过两者 srcset URL 逐字相同。首页三处封面共用同一组 `widths={[400, 800, 1200]}`，让同一张封面生成相同 URL、浏览器只下载一次。详情页画廊 `sizes` 从 `33vw`（=475px，会误选 840w）改为实测的 `(max-width: 639px) 82vw, (max-width: 1023px) 32vw, 380px`，档位改 `[320, 420, 640, 840]`（桌面 3 列实测每张 376px，DPR1 命中 420w）；原来写死的 1280w 档实际永远用不上。所有预取都排在首屏之后，不抢背景与封面的带宽。
 - **实测基线**（Fast 3G 1.6Mbps / 150ms RTT，冷缓存，1440×900）：首屏总传输 530KB → 164KB，`load` 事件 3025ms → 1150ms，背景图 2635ms → 980ms；连续滚动 115 帧中超过 32ms 的掉帧 42 → 5，平均帧间隔 23.6ms → 17.4ms。
+- **本轮图片专项实测**（CDP 冷缓存、固定日间主题、1440×900、无节流）：首页图片 383KB / 17 个请求 / LCP 260ms → **245KB / 15 个 / 212ms**；详情页 690KB / 13 个 / LCP 240ms → **272KB / 11 个 / 192ms**（传输量 -36% / -61%）。4G 节流下 LCP 约 560ms。`dist` 内图片总体积 8560KB → 7826KB（画廊从 3 档加到 4 档让构建产物略增，但单次下载更小）。首页图片请求 URL 无重复，360 / 390 / 768 / 1024 / 1440px 均无横向溢出。
 
 ## 部署（GitHub Pages）
 

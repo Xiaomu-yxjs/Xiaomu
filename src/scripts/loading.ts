@@ -74,29 +74,46 @@ function linkFrom(target: EventTarget | null): HTMLAnchorElement | null {
   return target instanceof Element ? target.closest('a') : null;
 }
 
-function decodeImage(src: string): Promise<void> {
+/** 把 srcset 里的相对地址补全成绝对地址，浏览器才不会按当前路径解析错 */
+function absoluteSrcset(srcset: string, base: string): string {
+  return srcset
+    .split(',')
+    .map((entry) => {
+      const match = entry.trim().match(/^(\S+)(\s+.*)?$/);
+      if (!match) return entry.trim();
+      return new URL(match[1], base).href + (match[2] ?? '');
+    })
+    .join(', ');
+}
+
+/** 预热一张响应式图片：带上目标页的 srcset / sizes，让浏览器自己选档位。
+    之前直接取 img.src（最大档 fallback 图），既浪费带宽，跳转后又命中不了缓存。 */
+function decodeResponsiveImage(img: HTMLImageElement, base: string): Promise<void> {
   return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-    img.src = src;
-    if (img.complete) resolve();
+    const probe = new Image();
+    const done = () => resolve();
+    probe.onload = done;
+    probe.onerror = done;
+    const srcset = img.getAttribute('srcset');
+    if (srcset) {
+      probe.sizes = img.getAttribute('sizes') || '100vw';
+      probe.srcset = absoluteSrcset(srcset, base);
+    }
+    const src = img.getAttribute('src');
+    if (src) probe.src = new URL(src, base).href;
+    if (!srcset && !src) done();
+    if (probe.complete) done();
   });
 }
 
-/** 取目标页 HTML，并把首屏几张图提前下载解码，跳转后就能直接命中缓存 */
+/** 取目标页 HTML，只预热首屏前两张图，避免一次性把整个画廊的大图都拉下来 */
 async function warmPage(href: string) {
   const res = await fetch(href, { credentials: 'same-origin' });
   if (!res.ok) return;
   const html = await res.text();
   const doc = new DOMParser().parseFromString(html, 'text/html');
-  const urls = new Set<string>();
-  doc.querySelectorAll('main img').forEach((img, i) => {
-    if (i >= 6) return;
-    const src = img.getAttribute('src');
-    if (src) urls.add(new URL(src, href).href);
-  });
-  await Promise.allSettled([...urls].map(decodeImage));
+  const imgs = [...doc.querySelectorAll('main img')].slice(0, 2);
+  await Promise.allSettled(imgs.map((img) => decodeResponsiveImage(img as HTMLImageElement, href)));
 }
 
 let navigating = false;

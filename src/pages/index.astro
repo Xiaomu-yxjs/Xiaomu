@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PickCard from '../components/PickCard.astro';
 import GameCard from '../components/GameCard.astro';
@@ -12,12 +12,31 @@ const stats = [
   { label: '编辑精选', value: String(picks.length) },
   { label: '更新节奏', value: '每周' },
 ];
+
+// LCP 图在 <head> 就发起请求，不必等解析到 body 里的 <img>。
+// 参数必须和下面 <Image> 完全一致，浏览器才会复用同一个请求。
+const heroLcp = await getImage({
+  src: getCover(picks[0].cover),
+  widths: [400, 800, 1200],
+  sizes: '300px',
+  format: 'webp',
+  quality: 68,
+});
 ---
 
 <BaseLayout
   title="小苜-游戏测评站"
   description="数据驱动的手游测评站：先看结论，再看玩法、氪金与适配人群。评分、玩法、平台一目了然。"
 >
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    type="image/webp"
+    imagesrcset={heroLcp.srcSet.attribute}
+    imagesizes="300px"
+    fetchpriority="high"
+  />
   <section class="hero">
     <div class="wrap hero-inner">
       <div class="hero-copy">
@@ -51,6 +70,7 @@ const stats = [
               alt=""
               widths={[400, 800, 1200]}
               sizes="300px"
+              quality={68}
               loading="eager"
               fetchpriority={i === 0 ? 'high' : 'low'}
             />

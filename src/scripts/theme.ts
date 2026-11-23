@@ -44,15 +44,26 @@ window.addEventListener('storage', (e) => {
   if (e.key === KEY && (e.newValue === 'day' || e.newValue === 'night')) apply(e.newValue);
 });
 
-// 浏览器空闲时才预取另一套背景，切换时不必等网络；不占首屏带宽
+// 另一套背景不参与首屏：以前在 idle 就预取，导致日夜两张图（约 194 KB）
+// 在首屏一起下载。改成「用户明确要切换」或「首屏全部加载完之后」才备图。
+let otherBgReady = false;
 function prefetchOtherBg() {
+  if (otherBgReady) return;
+  otherBgReady = true;
   const url = current() === 'day' ? document.body.dataset.bgNight : document.body.dataset.bgDay;
   if (!url) return;
   const img = new Image();
   img.src = url;
 }
-const idle = (window as unknown as {
-  requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-}).requestIdleCallback;
-if (idle) idle.call(window, prefetchOtherBg, { timeout: 4000 });
-else window.setTimeout(prefetchOtherBg, 2500);
+
+// 指针移到 / 聚焦 / 按下主题按钮时立即备图，点击时基本已命中缓存
+btn?.addEventListener('pointerenter', prefetchOtherBg, { once: true });
+btn?.addEventListener('pointerdown', prefetchOtherBg, { once: true });
+btn?.addEventListener('focus', prefetchOtherBg, { once: true });
+
+// 兜底：等 load（首屏图片全部到位）之后再等一会儿，彻底避开首屏带宽
+function scheduleBgPrefetch() {
+  window.setTimeout(prefetchOtherBg, 15000);
+}
+if (document.readyState === 'complete') scheduleBgPrefetch();
+else window.addEventListener('load', scheduleBgPrefetch, { once: true });
